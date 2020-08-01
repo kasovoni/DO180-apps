@@ -598,3 +598,944 @@ Completing the Guided Exercise: Loading the Database
  · Removing the fcontext for /var/local/mysql..................  SUCCESS
 [student@workstation DO180-apps]$ 
 
+============================================
+LAB: Managing Containers
+============================================
+[student@workstation DO180-apps]$ lab manage-review start 
+
+Setting up workstation for the Lab: Managing Containers
+
+ · Checking podman configuration...............................  SUCCESS
+ · Check that /var/local/mysql does not exist..................  SUCCESS
+ · Downloading starter project.................................  SUCCESS
+ · Downloading solution project................................  SUCCESS
+
+Setup successful. Please proceed with the exercise.
+
+[student@workstation DO180-apps]$ mkdir -pv /var/local/mysql
+mkdir: cannot create directory ‘/var/local/mysql’: Permission denied
+[student@workstation DO180-apps]$ sudo mkdir -pv /var/local/mysql
+mkdir: created directory ‘/var/local/mysql’
+[student@workstation DO180-apps]$ sudo semanage fcontext -a -t container_file_t '/var/log/mysql(/.*)?'
+[student@workstation DO180-apps]$ sudo restorecon -R /var/lo
+local/ lock/  log/   
+[student@workstation DO180-apps]$ sudo restorecon -R /var/log/mysql
+restorecon:  lstat(/var/log/mysql) failed:  No such file or directory
+[student@workstation DO180-apps]$ sudo restorecon -R /var/local/mysql
+[student@workstation DO180-apps]$ sud chown -Rv 27:27 /var/local/mysql
+bash: sud: command not found...
+[student@workstation DO180-apps]$ sudo chown -Rv 27:27 /var/local/mysql
+changed ownership of ‘/var/local/mysql’ from root:root to 27:27
+[student@workstation DO180-apps]$ sudo podman run --name mysql-1 -d -v /var/local/mysql:/var/lib/mysql/data -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7
+Trying to pull registry.access.redhat.com/rhscl/mysql-57-rhel7:latest...Getting image source signatures
+Copying blob sha256:1c9f515fc6ab2b7ebfcaffd8af681b68869d78a3b19c69e87c296363ab1bc2fe
+ 72.70 MB / ? [=-----------------------------------------------------------] 6s 
+Copying blob sha256:1d2c4ce43b78cb9a97ede7f19ad1406a43ee50532568bda660193e4a404b424f
+ 1.54 KB / ? [--------------------------------------=----------------------] 0s 
+Copying blob sha256:f1e961fe4c5192ab9f8e241a2efc674779623ac6a3ed49ee9a1a5b3b8425fe0d
+ 6.85 MB / ? [-----------------------=-------------------------------------] 0s 
+Copying blob sha256:9f1840c3b3bd1303763f9abba51fdd1dcce1ed28bfff318dd2af055b78207520
+ 62.31 MB / ? [-------------------=----------------------------------------] 5s 
+Copying config sha256:60726b33a00a2c3be60e25c3270a34a9b147db86602f05a71988a1c92a70cebc
+ 6.85 KB / 6.85 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+eae3c77a4073ac277f88d110b13f6ae15b8dfa5d293923993aa755e405b0076c
+[student@workstation DO180-apps]$ sudo podman ps
+[student@workstation DO180-apps]$ sudo podman ps
+[student@workstation DO180-apps]$ sudo podman run --name mysql-1 -d -v /var/local/mysql:/var/lib/mysql/data -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7^C
+[student@workstation DO180-apps]$ ls -dZ /var/local/mysql/
+drwxr-xr-x. 27 27 unconfined_u:object_r:var_t:s0   /var/local/mysql/
+[student@workstation DO180-apps]$ sudo semanage fcontext -a -t container_file_t '/var/local/mysql(/.*)?'
+[student@workstation DO180-apps]$ sudo restorecon -R /var/local/mysql
+[student@workstation DO180-apps]$ ls -dZ /var/local/mysql/
+drwxr-xr-x. 27 27 unconfined_u:object_r:container_file_t:s0 /var/local/mysql/
+[student@workstation DO180-apps]$ sudo podman run --name mysql-1 -d -v /var/local/mysql:/var/lib/mysql/data -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7
+error creating container storage: the container name "mysql-1" is already in use by "eae3c77a4073ac277f88d110b13f6ae15b8dfa5d293923993aa755e405b0076c". You have to remove that container to be able to reuse that name.: that name is already in use
+[student@workstation DO180-apps]$ sudo podman rm mysql-1
+eae3c77a4073ac277f88d110b13f6ae15b8dfa5d293923993aa755e405b0076c
+[student@workstation DO180-apps]$ sudo podman run --name mysql-1 -d -v /var/local/mysql:/var/lib/mysql/data -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7
+b0c23adfd1f135878bbc1e6af04aa68c68fb52015587595f09f815d3f6645276
+[student@workstation DO180-apps]$ sudo podman ps
+CONTAINER ID   IMAGE                                                    COMMAND                  CREATED         STATUS             PORTS   NAMES
+b0c23adfd1f1   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   7 seconds ago   Up 7 seconds ago           mysql-1
+[student@workstation DO180-apps]$ sudo podman inspect -f '{{.NetworkSettings.IPAddress}}'
+container or image name must be specified: podman inspect [options [...]] name
+[student@workstation DO180-apps]$ sudo podman inspect -f '{{.NetworkSettings.IPAddress}}' mysql-1
+10.88.0.10
+[student@workstation DO180-apps]$ mysql -uuser1 -h 10.88.0.10 -pmypa55 items </home/student/DO180/labs/manage-review/db.sql 
+[student@workstation DO180-apps]$ mysql -uuser1 -h 10.88.0.10 -pmypa55 items -e "select * from Item"
++----+-------------------+------+
+| id | description       | done |
++----+-------------------+------+
+|  1 | Pick up newspaper |    0 |
+|  2 | Buy groceries     |    1 |
++----+-------------------+------+
+[student@workstation DO180-apps]$ sudo podman stop mysql-1
+b0c23adfd1f135878bbc1e6af04aa68c68fb52015587595f09f815d3f6645276
+[student@workstation DO180-apps]$ sudo podman run --name mysql-2 -d -v /var/local/mysql:/var/lib/mysql/data -p 13306:3306 -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7
+e779b21b1d4bafafc79ba47d5afd11f745f15638b15bea7cadabcdbfb0473701
+[student@workstation DO180-apps]$ sudo podman ps
+CONTAINER ID   IMAGE                                                    COMMAND                  CREATED          STATUS              PORTS                     NAMES
+e779b21b1d4b   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   20 seconds ago   Up 20 seconds ago   0.0.0.0:13306->3306/tcp   mysql-2
+[student@workstation DO180-apps]$ sudo podman ps -a
+CONTAINER ID   IMAGE                                                    COMMAND                  CREATED          STATUS                     PORTS                     NAMES     IS INFRA
+e779b21b1d4b   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   39 seconds ago   Up 38 seconds ago          0.0.0.0:13306->3306/tcp   mysql-2   false
+b0c23adfd1f1   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   6 minutes ago    Exited (0) 3 minutes ago                             mysql-1   false
+[student@workstation DO180-apps]$ sudo podman ps >/tmp/my-containers
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash
+bash-4.2$ mysql -uuser1 -pmypa55 
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.7.24 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| items              |
++--------------------+
+2 rows in set (0.00 sec)
+
+mysql> use items;
+Database changed
+mysql> show tables;
++-----------------+
+| Tables_in_items |
++-----------------+
+| Item            |
++-----------------+
+1 row in set (0.00 sec)
+
+mysql> select * from Item;
++----+-------------------+------+
+| id | description       | done |
++----+-------------------+------+
+|  1 | Pick up newspaper |    0 |
+|  2 | Buy groceries     |    1 |
++----+-------------------+------+
+2 rows in set (0.01 sec)
+
+mysql> exit
+Bye
+bash-4.2$ exit
+exit
+[student@workstation DO180-apps]$ mysql -uuser1 -pmypa55 -h 127.0.0.1 -p13306 items
+ERROR 2003 (HY000): Can't connect to MySQL server on '127.0.0.1' (111)
+[student@workstation DO180-apps]$ mysql -uuser1 -pmypa55 -h 127.0.0.1 -^C3306 items
+[student@workstation DO180-apps]$ hostname
+workstation.lab.example.com
+[student@workstation DO180-apps]$ mysql -uuser1 -pmypa55 -h workstation.lab.example.com -p13306 items
+ERROR 2003 (HY000): Can't connect to MySQL server on 'workstation.lab.example.com' (111)
+[student@workstation DO180-apps]$ sudo podman ps
+CONTAINER ID   IMAGE                                                    COMMAND                  CREATED         STATUS             PORTS                     NAMES
+e779b21b1d4b   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   7 minutes ago   Up 7 minutes ago   0.0.0.0:13306->3306/tcp   mysql-2
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -e "insert into Item (description,done) values ('Finished lab',1);"'
+lab,1);": -c: line 0: unexpected EOF while looking for matching `"'
+lab,1);": -c: line 1: syntax error: unexpected end of file
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -e "insert into Item (description,done) values ("Finished lab",1);"'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1044 (42000): Access denied for user 'user1'@'%' to database 'lab,1);'
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -p -e "insert into Item (description,done) values ("Finished lab",1);"'
+Enter password: 
+ERROR 1044 (42000): Access denied for user 'user1'@'%' to database 'lab,1);'
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uroot -p -e "insert into Item (description,done) values ("Finished lab",1);"'
+Enter password: 
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -e "insert into Item (description,done) values ("Finished lab",1);"' -h workstation.lab.example.com
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1044 (42000): Access denied for user 'user1'@'%' to database 'lab,1);'
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uroot -p -e "insert into Item (description,done) values ("Finished lab",1);"' -h workstation.lab.example.com
+Enter password: 
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uroot -p -e "insert into Item (description,done) values ("Finished lab",1);"' -h workstation.lab.example.com
+Enter password: 
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -e "insert into Item (description,done) values ("Finished lab",1);"' -h workstation.lab.example.com -P13306 items
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1044 (42000): Access denied for user 'user1'@'%' to database 'lab,1);'
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 items -e "insert into Item (description,done) values ("Finished lab",1);"' 
+mysql: [Warning] Using a password on the command line interface can be insecure.
+mysql  Ver 14.14 Distrib 5.7.24, for Linux (x86_64) using  EditLine wrapper
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Usage: mysql [OPTIONS] [database]
+  -?, --help          Display this help and exit.
+  -I, --help          Synonym for -?
+  --auto-rehash       Enable automatic rehashing. One doesn't need to use
+                      'rehash' to get table and field completion, but startup
+                      and reconnecting may take a longer time. Disable with
+                      --disable-auto-rehash.
+                      (Defaults to on; use --skip-auto-rehash to disable.)
+  -A, --no-auto-rehash 
+                      No automatic rehashing. One has to use 'rehash' to get
+                      table and field completion. This gives a quicker start of
+                      mysql and disables rehashing on reconnect.
+  --auto-vertical-output 
+                      Automatically switch to vertical output mode if the
+                      result is wider than the terminal width.
+  -B, --batch         Don't use history file. Disable interactive behavior.
+                      (Enables --silent.)
+  --bind-address=name IP address to bind to.
+  --binary-as-hex     Print binary data as hex
+  --character-sets-dir=name 
+                      Directory for character set files.
+  --column-type-info  Display column type information.
+  -c, --comments      Preserve comments. Send comments to the server. The
+                      default is --skip-comments (discard comments), enable
+                      with --comments.
+  -C, --compress      Use compression in server/client protocol.
+  -#, --debug[=#]     This is a non-debug version. Catch this and exit.
+  --debug-check       This is a non-debug version. Catch this and exit.
+  -T, --debug-info    This is a non-debug version. Catch this and exit.
+  -D, --database=name Database to use.
+  --default-character-set=name 
+                      Set the default character set.
+  --delimiter=name    Delimiter to be used.
+  --enable-cleartext-plugin 
+                      Enable/disable the clear text authentication plugin.
+  -e, --execute=name  Execute command and quit. (Disables --force and history
+                      file.)
+  -E, --vertical      Print the output of a query (rows) vertically.
+  -f, --force         Continue even if we get an SQL error.
+  --histignore=name   A colon-separated list of patterns to keep statements
+                      from getting logged into syslog and mysql history.
+  -G, --named-commands 
+                      Enable named commands. Named commands mean this program's
+                      internal commands; see mysql> help . When enabled, the
+                      named commands can be used from any line of the query,
+                      otherwise only from the first line, before an enter.
+                      Disable with --disable-named-commands. This option is
+                      disabled by default.
+  -i, --ignore-spaces Ignore space after function names.
+  --init-command=name SQL Command to execute when connecting to MySQL server.
+                      Will automatically be re-executed when reconnecting.
+  --local-infile      Enable/disable LOAD DATA LOCAL INFILE.
+  -b, --no-beep       Turn off beep on error.
+  -h, --host=name     Connect to host.
+  -H, --html          Produce HTML output.
+  -X, --xml           Produce XML output.
+  --line-numbers      Write line numbers for errors.
+                      (Defaults to on; use --skip-line-numbers to disable.)
+  -L, --skip-line-numbers 
+                      Don't write line number for errors.
+  -n, --unbuffered    Flush buffer after each query.
+  --column-names      Write column names in results.
+                      (Defaults to on; use --skip-column-names to disable.)
+  -N, --skip-column-names 
+                      Don't write column names in results.
+  --sigint-ignore     Ignore SIGINT (CTRL-C).
+  -o, --one-database  Ignore statements except those that occur while the
+                      default database is the one named at the command line.
+  --pager[=name]      Pager to use to display results. If you don't supply an
+                      option, the default pager is taken from your ENV variable
+                      PAGER. Valid pagers are less, more, cat [> filename],
+                      etc. See interactive help (\h) also. This option does not
+                      work in batch mode. Disable with --disable-pager. This
+                      option is disabled by default.
+  -p, --password[=name] 
+                      Password to use when connecting to server. If password is
+                      not given it's asked from the tty.
+  -P, --port=#        Port number to use for connection or 0 for default to, in
+                      order of preference, my.cnf, $MYSQL_TCP_PORT,
+                      /etc/services, built-in default (3306).
+  --prompt=name       Set the mysql prompt to this value.
+  --protocol=name     The protocol to use for connection (tcp, socket, pipe,
+                      memory).
+  -q, --quick         Don't cache result, print it row by row. This may slow
+                      down the server if the output is suspended. Doesn't use
+                      history file.
+  -r, --raw           Write fields without conversion. Used with --batch.
+  --reconnect         Reconnect if the connection is lost. Disable with
+                      --disable-reconnect. This option is enabled by default.
+                      (Defaults to on; use --skip-reconnect to disable.)
+  -s, --silent        Be more silent. Print results with a tab as separator,
+                      each row on new line.
+  -S, --socket=name   The socket file to use for connection.
+  --ssl-mode=name     SSL connection mode.
+  --ssl               Deprecated. Use --ssl-mode instead.
+                      (Defaults to on; use --skip-ssl to disable.)
+  --ssl-verify-server-cert 
+                      Deprecated. Use --ssl-mode=VERIFY_IDENTITY instead.
+  --ssl-ca=name       CA file in PEM format.
+  --ssl-capath=name   CA directory.
+  --ssl-cert=name     X509 cert in PEM format.
+  --ssl-cipher=name   SSL cipher to use.
+  --ssl-key=name      X509 key in PEM format.
+  --ssl-crl=name      Certificate revocation list.
+  --ssl-crlpath=name  Certificate revocation list path.
+  --tls-version=name  TLS version to use, permitted values are: TLSv1, TLSv1.1,
+                      TLSv1.2
+  --server-public-key-path=name 
+                      File path to the server public RSA key in PEM format.
+  --get-server-public-key 
+                      Get server public key
+  -t, --table         Output in table format.
+  --tee=name          Append everything into outfile. See interactive help (\h)
+                      also. Does not work in batch mode. Disable with
+                      --disable-tee. This option is disabled by default.
+  -u, --user=name     User for login if not current user.
+  -U, --safe-updates  Only allow UPDATE and DELETE that uses keys.
+  -U, --i-am-a-dummy  Synonym for option --safe-updates, -U.
+  -v, --verbose       Write more. (-v -v -v gives the table output format).
+  -V, --version       Output version information and exit.
+  -w, --wait          Wait and retry if connection is down.
+  --connect-timeout=# Number of seconds before connection timeout.
+  --max-allowed-packet=# 
+                      The maximum packet length to send to or receive from
+                      server.
+  --net-buffer-length=# 
+                      The buffer size for TCP/IP and socket communication.
+  --select-limit=#    Automatic limit for SELECT when using --safe-updates.
+  --max-join-size=#   Automatic limit for rows in a join when using
+                      --safe-updates.
+  --secure-auth       Refuse client connecting to server if it uses old
+                      (pre-4.1.1) protocol. Deprecated. Always TRUE
+  --server-arg=name   Send embedded server this as a parameter.
+  --show-warnings     Show warnings after every statement.
+  -j, --syslog        Log filtered interactive commands to syslog. Filtering of
+                      commands depends on the patterns supplied via histignore
+                      option besides the default patterns.
+  --plugin-dir=name   Directory for client-side plugins.
+  --default-auth=name Default authentication client-side plugin to use.
+  --binary-mode       By default, ASCII '\0' is disallowed and '\r\n' is
+                      translated to '\n'. This switch turns off both features,
+                      and also turns off parsing of all clientcommands except
+                      \C and DELIMITER, in non-interactive mode (for input
+                      piped to mysql or loaded using the 'source' command).
+                      This is necessary when processing output from mysqlbinlog
+                      that may contain blobs.
+  --connect-expired-password 
+                      Notify the server that this client is prepared to handle
+                      expired password sandbox mode.
+
+Default options are read from the following files in the given order:
+/etc/opt/rh/rh-mysql57/my.cnf /etc/opt/rh/rh-mysql57/mysql/my.cnf ~/.my.cnf 
+The following groups are read: mysql client
+The following options may be given as the first argument:
+--print-defaults        Print the program argument list and exit.
+--no-defaults           Don't read default options from any option file,
+                        except for login file.
+--defaults-file=#       Only read default options from the given file #.
+--defaults-extra-file=# Read this file after the global files are read.
+--defaults-group-suffix=#
+                        Also read groups with concat(group, suffix)
+--login-path=#          Read this path from the login file.
+
+Variables (--variable-name=value)
+and boolean options {FALSE|TRUE}  Value (after reading options)
+--------------------------------- ----------------------------------------
+auto-rehash                       FALSE
+auto-vertical-output              FALSE
+bind-address                      (No default value)
+binary-as-hex                     FALSE
+character-sets-dir                (No default value)
+column-type-info                  FALSE
+comments                          FALSE
+compress                          FALSE
+database                          (No default value)
+default-character-set             auto
+delimiter                         ;
+enable-cleartext-plugin           FALSE
+vertical                          FALSE
+force                             FALSE
+histignore                        (No default value)
+named-commands                    FALSE
+ignore-spaces                     FALSE
+init-command                      (No default value)
+local-infile                      FALSE
+no-beep                           FALSE
+host                              workstation.lab.example.com
+html                              FALSE
+xml                               FALSE
+line-numbers                      TRUE
+unbuffered                        FALSE
+column-names                      TRUE
+sigint-ignore                     FALSE
+port                              13306
+prompt                            mysql> 
+quick                             FALSE
+raw                               FALSE
+reconnect                         FALSE
+socket                            (No default value)
+ssl                               TRUE
+ssl-verify-server-cert            FALSE
+ssl-ca                            (No default value)
+ssl-capath                        (No default value)
+ssl-cert                          (No default value)
+ssl-cipher                        (No default value)
+ssl-key                           (No default value)
+ssl-crl                           (No default value)
+ssl-crlpath                       (No default value)
+tls-version                       (No default value)
+server-public-key-path            (No default value)
+get-server-public-key             FALSE
+table                             FALSE
+user                              user1
+safe-updates                      FALSE
+i-am-a-dummy                      FALSE
+connect-timeout                   0
+max-allowed-packet                16777216
+net-buffer-length                 16384
+select-limit                      1000
+max-join-size                     1000000
+secure-auth                       TRUE
+show-warnings                     FALSE
+plugin-dir                        (No default value)
+default-auth                      (No default value)
+binary-mode                       FALSE
+connect-expired-password          FALSE
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec -it mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 items -e "insert into Item (description,done) values ('Finished lab',1);"' 
+lab,1);": -c: line 0: unexpected EOF while looking for matching `"'
+lab,1);": -c: line 1: syntax error: unexpected end of file
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -e "select * from items.Projects;"'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1146 (42S02) at line 1: Table 'items.Projects' doesn't exist
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec  mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 items -e "insert into Item (description,done) values ('Finished lab',1);"' 
+lab,1);": -c: line 0: unexpected EOF while looking for matching `"'
+lab,1);": -c: line 1: syntax error: unexpected end of file
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec  mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 items -e "insert into Item (description,done) values ("Finished lab",1);"' 
+mysql: [Warning] Using a password on the command line interface can be insecure.
+mysql  Ver 14.14 Distrib 5.7.24, for Linux (x86_64) using  EditLine wrapper
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Usage: mysql [OPTIONS] [database]
+  -?, --help          Display this help and exit.
+  -I, --help          Synonym for -?
+  --auto-rehash       Enable automatic rehashing. One doesn't need to use
+                      'rehash' to get table and field completion, but startup
+                      and reconnecting may take a longer time. Disable with
+                      --disable-auto-rehash.
+                      (Defaults to on; use --skip-auto-rehash to disable.)
+  -A, --no-auto-rehash 
+                      No automatic rehashing. One has to use 'rehash' to get
+                      table and field completion. This gives a quicker start of
+                      mysql and disables rehashing on reconnect.
+  --auto-vertical-output 
+                      Automatically switch to vertical output mode if the
+                      result is wider than the terminal width.
+  -B, --batch         Don't use history file. Disable interactive behavior.
+                      (Enables --silent.)
+  --bind-address=name IP address to bind to.
+  --binary-as-hex     Print binary data as hex
+  --character-sets-dir=name 
+                      Directory for character set files.
+  --column-type-info  Display column type information.
+  -c, --comments      Preserve comments. Send comments to the server. The
+                      default is --skip-comments (discard comments), enable
+                      with --comments.
+  -C, --compress      Use compression in server/client protocol.
+  -#, --debug[=#]     This is a non-debug version. Catch this and exit.
+  --debug-check       This is a non-debug version. Catch this and exit.
+  -T, --debug-info    This is a non-debug version. Catch this and exit.
+  -D, --database=name Database to use.
+  --default-character-set=name 
+                      Set the default character set.
+  --delimiter=name    Delimiter to be used.
+  --enable-cleartext-plugin 
+                      Enable/disable the clear text authentication plugin.
+  -e, --execute=name  Execute command and quit. (Disables --force and history
+                      file.)
+  -E, --vertical      Print the output of a query (rows) vertically.
+  -f, --force         Continue even if we get an SQL error.
+  --histignore=name   A colon-separated list of patterns to keep statements
+                      from getting logged into syslog and mysql history.
+  -G, --named-commands 
+                      Enable named commands. Named commands mean this program's
+                      internal commands; see mysql> help . When enabled, the
+                      named commands can be used from any line of the query,
+                      otherwise only from the first line, before an enter.
+                      Disable with --disable-named-commands. This option is
+                      disabled by default.
+  -i, --ignore-spaces Ignore space after function names.
+  --init-command=name SQL Command to execute when connecting to MySQL server.
+                      Will automatically be re-executed when reconnecting.
+  --local-infile      Enable/disable LOAD DATA LOCAL INFILE.
+  -b, --no-beep       Turn off beep on error.
+  -h, --host=name     Connect to host.
+  -H, --html          Produce HTML output.
+  -X, --xml           Produce XML output.
+  --line-numbers      Write line numbers for errors.
+                      (Defaults to on; use --skip-line-numbers to disable.)
+  -L, --skip-line-numbers 
+                      Don't write line number for errors.
+  -n, --unbuffered    Flush buffer after each query.
+  --column-names      Write column names in results.
+                      (Defaults to on; use --skip-column-names to disable.)
+  -N, --skip-column-names 
+                      Don't write column names in results.
+  --sigint-ignore     Ignore SIGINT (CTRL-C).
+  -o, --one-database  Ignore statements except those that occur while the
+                      default database is the one named at the command line.
+  --pager[=name]      Pager to use to display results. If you don't supply an
+                      option, the default pager is taken from your ENV variable
+                      PAGER. Valid pagers are less, more, cat [> filename],
+                      etc. See interactive help (\h) also. This option does not
+                      work in batch mode. Disable with --disable-pager. This
+                      option is disabled by default.
+  -p, --password[=name] 
+                      Password to use when connecting to server. If password is
+                      not given it's asked from the tty.
+  -P, --port=#        Port number to use for connection or 0 for default to, in
+                      order of preference, my.cnf, $MYSQL_TCP_PORT,
+                      /etc/services, built-in default (3306).
+  --prompt=name       Set the mysql prompt to this value.
+  --protocol=name     The protocol to use for connection (tcp, socket, pipe,
+                      memory).
+  -q, --quick         Don't cache result, print it row by row. This may slow
+                      down the server if the output is suspended. Doesn't use
+                      history file.
+  -r, --raw           Write fields without conversion. Used with --batch.
+  --reconnect         Reconnect if the connection is lost. Disable with
+                      --disable-reconnect. This option is enabled by default.
+                      (Defaults to on; use --skip-reconnect to disable.)
+  -s, --silent        Be more silent. Print results with a tab as separator,
+                      each row on new line.
+  -S, --socket=name   The socket file to use for connection.
+  --ssl-mode=name     SSL connection mode.
+  --ssl               Deprecated. Use --ssl-mode instead.
+                      (Defaults to on; use --skip-ssl to disable.)
+  --ssl-verify-server-cert 
+                      Deprecated. Use --ssl-mode=VERIFY_IDENTITY instead.
+  --ssl-ca=name       CA file in PEM format.
+  --ssl-capath=name   CA directory.
+  --ssl-cert=name     X509 cert in PEM format.
+  --ssl-cipher=name   SSL cipher to use.
+  --ssl-key=name      X509 key in PEM format.
+  --ssl-crl=name      Certificate revocation list.
+  --ssl-crlpath=name  Certificate revocation list path.
+  --tls-version=name  TLS version to use, permitted values are: TLSv1, TLSv1.1,
+                      TLSv1.2
+  --server-public-key-path=name 
+                      File path to the server public RSA key in PEM format.
+  --get-server-public-key 
+                      Get server public key
+  -t, --table         Output in table format.
+  --tee=name          Append everything into outfile. See interactive help (\h)
+                      also. Does not work in batch mode. Disable with
+                      --disable-tee. This option is disabled by default.
+  -u, --user=name     User for login if not current user.
+  -U, --safe-updates  Only allow UPDATE and DELETE that uses keys.
+  -U, --i-am-a-dummy  Synonym for option --safe-updates, -U.
+  -v, --verbose       Write more. (-v -v -v gives the table output format).
+  -V, --version       Output version information and exit.
+  -w, --wait          Wait and retry if connection is down.
+  --connect-timeout=# Number of seconds before connection timeout.
+  --max-allowed-packet=# 
+                      The maximum packet length to send to or receive from
+                      server.
+  --net-buffer-length=# 
+                      The buffer size for TCP/IP and socket communication.
+  --select-limit=#    Automatic limit for SELECT when using --safe-updates.
+  --max-join-size=#   Automatic limit for rows in a join when using
+                      --safe-updates.
+  --secure-auth       Refuse client connecting to server if it uses old
+                      (pre-4.1.1) protocol. Deprecated. Always TRUE
+  --server-arg=name   Send embedded server this as a parameter.
+  --show-warnings     Show warnings after every statement.
+  -j, --syslog        Log filtered interactive commands to syslog. Filtering of
+                      commands depends on the patterns supplied via histignore
+                      option besides the default patterns.
+  --plugin-dir=name   Directory for client-side plugins.
+  --default-auth=name Default authentication client-side plugin to use.
+  --binary-mode       By default, ASCII '\0' is disallowed and '\r\n' is
+                      translated to '\n'. This switch turns off both features,
+                      and also turns off parsing of all clientcommands except
+                      \C and DELIMITER, in non-interactive mode (for input
+                      piped to mysql or loaded using the 'source' command).
+                      This is necessary when processing output from mysqlbinlog
+                      that may contain blobs.
+  --connect-expired-password 
+                      Notify the server that this client is prepared to handle
+                      expired password sandbox mode.
+
+Default options are read from the following files in the given order:
+/etc/opt/rh/rh-mysql57/my.cnf /etc/opt/rh/rh-mysql57/mysql/my.cnf ~/.my.cnf 
+The following groups are read: mysql client
+The following options may be given as the first argument:
+--print-defaults        Print the program argument list and exit.
+--no-defaults           Don't read default options from any option file,
+                        except for login file.
+--defaults-file=#       Only read default options from the given file #.
+--defaults-extra-file=# Read this file after the global files are read.
+--defaults-group-suffix=#
+                        Also read groups with concat(group, suffix)
+--login-path=#          Read this path from the login file.
+
+Variables (--variable-name=value)
+and boolean options {FALSE|TRUE}  Value (after reading options)
+--------------------------------- ----------------------------------------
+auto-rehash                       FALSE
+auto-vertical-output              FALSE
+bind-address                      (No default value)
+binary-as-hex                     FALSE
+character-sets-dir                (No default value)
+column-type-info                  FALSE
+comments                          FALSE
+compress                          FALSE
+database                          (No default value)
+default-character-set             auto
+delimiter                         ;
+enable-cleartext-plugin           FALSE
+vertical                          FALSE
+force                             FALSE
+histignore                        (No default value)
+named-commands                    FALSE
+ignore-spaces                     FALSE
+init-command                      (No default value)
+local-infile                      FALSE
+no-beep                           FALSE
+host                              workstation.lab.example.com
+html                              FALSE
+xml                               FALSE
+line-numbers                      TRUE
+unbuffered                        FALSE
+column-names                      TRUE
+sigint-ignore                     FALSE
+port                              13306
+prompt                            mysql> 
+quick                             FALSE
+raw                               FALSE
+reconnect                         FALSE
+socket                            (No default value)
+ssl                               TRUE
+ssl-verify-server-cert            FALSE
+ssl-ca                            (No default value)
+ssl-capath                        (No default value)
+ssl-cert                          (No default value)
+ssl-cipher                        (No default value)
+ssl-key                           (No default value)
+ssl-crl                           (No default value)
+ssl-crlpath                       (No default value)
+tls-version                       (No default value)
+server-public-key-path            (No default value)
+get-server-public-key             FALSE
+table                             FALSE
+user                              user1
+safe-updates                      FALSE
+i-am-a-dummy                      FALSE
+connect-timeout                   0
+max-allowed-packet                16777216
+net-buffer-length                 16384
+select-limit                      1000
+max-join-size                     1000000
+secure-auth                       TRUE
+show-warnings                     FALSE
+plugin-dir                        (No default value)
+default-auth                      (No default value)
+binary-mode                       FALSE
+connect-expired-password          FALSE
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec  mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 items -e "insert into items.Item (description,done) values ("Finished lab",1);"' 
+mysql: [Warning] Using a password on the command line interface can be insecure.
+mysql  Ver 14.14 Distrib 5.7.24, for Linux (x86_64) using  EditLine wrapper
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Usage: mysql [OPTIONS] [database]
+  -?, --help          Display this help and exit.
+  -I, --help          Synonym for -?
+  --auto-rehash       Enable automatic rehashing. One doesn't need to use
+                      'rehash' to get table and field completion, but startup
+                      and reconnecting may take a longer time. Disable with
+                      --disable-auto-rehash.
+                      (Defaults to on; use --skip-auto-rehash to disable.)
+  -A, --no-auto-rehash 
+                      No automatic rehashing. One has to use 'rehash' to get
+                      table and field completion. This gives a quicker start of
+                      mysql and disables rehashing on reconnect.
+  --auto-vertical-output 
+                      Automatically switch to vertical output mode if the
+                      result is wider than the terminal width.
+  -B, --batch         Don't use history file. Disable interactive behavior.
+                      (Enables --silent.)
+  --bind-address=name IP address to bind to.
+  --binary-as-hex     Print binary data as hex
+  --character-sets-dir=name 
+                      Directory for character set files.
+  --column-type-info  Display column type information.
+  -c, --comments      Preserve comments. Send comments to the server. The
+                      default is --skip-comments (discard comments), enable
+                      with --comments.
+  -C, --compress      Use compression in server/client protocol.
+  -#, --debug[=#]     This is a non-debug version. Catch this and exit.
+  --debug-check       This is a non-debug version. Catch this and exit.
+  -T, --debug-info    This is a non-debug version. Catch this and exit.
+  -D, --database=name Database to use.
+  --default-character-set=name 
+                      Set the default character set.
+  --delimiter=name    Delimiter to be used.
+  --enable-cleartext-plugin 
+                      Enable/disable the clear text authentication plugin.
+  -e, --execute=name  Execute command and quit. (Disables --force and history
+                      file.)
+  -E, --vertical      Print the output of a query (rows) vertically.
+  -f, --force         Continue even if we get an SQL error.
+  --histignore=name   A colon-separated list of patterns to keep statements
+                      from getting logged into syslog and mysql history.
+  -G, --named-commands 
+                      Enable named commands. Named commands mean this program's
+                      internal commands; see mysql> help . When enabled, the
+                      named commands can be used from any line of the query,
+                      otherwise only from the first line, before an enter.
+                      Disable with --disable-named-commands. This option is
+                      disabled by default.
+  -i, --ignore-spaces Ignore space after function names.
+  --init-command=name SQL Command to execute when connecting to MySQL server.
+                      Will automatically be re-executed when reconnecting.
+  --local-infile      Enable/disable LOAD DATA LOCAL INFILE.
+  -b, --no-beep       Turn off beep on error.
+  -h, --host=name     Connect to host.
+  -H, --html          Produce HTML output.
+  -X, --xml           Produce XML output.
+  --line-numbers      Write line numbers for errors.
+                      (Defaults to on; use --skip-line-numbers to disable.)
+  -L, --skip-line-numbers 
+                      Don't write line number for errors.
+  -n, --unbuffered    Flush buffer after each query.
+  --column-names      Write column names in results.
+                      (Defaults to on; use --skip-column-names to disable.)
+  -N, --skip-column-names 
+                      Don't write column names in results.
+  --sigint-ignore     Ignore SIGINT (CTRL-C).
+  -o, --one-database  Ignore statements except those that occur while the
+                      default database is the one named at the command line.
+  --pager[=name]      Pager to use to display results. If you don't supply an
+                      option, the default pager is taken from your ENV variable
+                      PAGER. Valid pagers are less, more, cat [> filename],
+                      etc. See interactive help (\h) also. This option does not
+                      work in batch mode. Disable with --disable-pager. This
+                      option is disabled by default.
+  -p, --password[=name] 
+                      Password to use when connecting to server. If password is
+                      not given it's asked from the tty.
+  -P, --port=#        Port number to use for connection or 0 for default to, in
+                      order of preference, my.cnf, $MYSQL_TCP_PORT,
+                      /etc/services, built-in default (3306).
+  --prompt=name       Set the mysql prompt to this value.
+  --protocol=name     The protocol to use for connection (tcp, socket, pipe,
+                      memory).
+  -q, --quick         Don't cache result, print it row by row. This may slow
+                      down the server if the output is suspended. Doesn't use
+                      history file.
+  -r, --raw           Write fields without conversion. Used with --batch.
+  --reconnect         Reconnect if the connection is lost. Disable with
+                      --disable-reconnect. This option is enabled by default.
+                      (Defaults to on; use --skip-reconnect to disable.)
+  -s, --silent        Be more silent. Print results with a tab as separator,
+                      each row on new line.
+  -S, --socket=name   The socket file to use for connection.
+  --ssl-mode=name     SSL connection mode.
+  --ssl               Deprecated. Use --ssl-mode instead.
+                      (Defaults to on; use --skip-ssl to disable.)
+  --ssl-verify-server-cert 
+                      Deprecated. Use --ssl-mode=VERIFY_IDENTITY instead.
+  --ssl-ca=name       CA file in PEM format.
+  --ssl-capath=name   CA directory.
+  --ssl-cert=name     X509 cert in PEM format.
+  --ssl-cipher=name   SSL cipher to use.
+  --ssl-key=name      X509 key in PEM format.
+  --ssl-crl=name      Certificate revocation list.
+  --ssl-crlpath=name  Certificate revocation list path.
+  --tls-version=name  TLS version to use, permitted values are: TLSv1, TLSv1.1,
+                      TLSv1.2
+  --server-public-key-path=name 
+                      File path to the server public RSA key in PEM format.
+  --get-server-public-key 
+                      Get server public key
+  -t, --table         Output in table format.
+  --tee=name          Append everything into outfile. See interactive help (\h)
+                      also. Does not work in batch mode. Disable with
+                      --disable-tee. This option is disabled by default.
+  -u, --user=name     User for login if not current user.
+  -U, --safe-updates  Only allow UPDATE and DELETE that uses keys.
+  -U, --i-am-a-dummy  Synonym for option --safe-updates, -U.
+  -v, --verbose       Write more. (-v -v -v gives the table output format).
+  -V, --version       Output version information and exit.
+  -w, --wait          Wait and retry if connection is down.
+  --connect-timeout=# Number of seconds before connection timeout.
+  --max-allowed-packet=# 
+                      The maximum packet length to send to or receive from
+                      server.
+  --net-buffer-length=# 
+                      The buffer size for TCP/IP and socket communication.
+  --select-limit=#    Automatic limit for SELECT when using --safe-updates.
+  --max-join-size=#   Automatic limit for rows in a join when using
+                      --safe-updates.
+  --secure-auth       Refuse client connecting to server if it uses old
+                      (pre-4.1.1) protocol. Deprecated. Always TRUE
+  --server-arg=name   Send embedded server this as a parameter.
+  --show-warnings     Show warnings after every statement.
+  -j, --syslog        Log filtered interactive commands to syslog. Filtering of
+                      commands depends on the patterns supplied via histignore
+                      option besides the default patterns.
+  --plugin-dir=name   Directory for client-side plugins.
+  --default-auth=name Default authentication client-side plugin to use.
+  --binary-mode       By default, ASCII '\0' is disallowed and '\r\n' is
+                      translated to '\n'. This switch turns off both features,
+                      and also turns off parsing of all clientcommands except
+                      \C and DELIMITER, in non-interactive mode (for input
+                      piped to mysql or loaded using the 'source' command).
+                      This is necessary when processing output from mysqlbinlog
+                      that may contain blobs.
+  --connect-expired-password 
+                      Notify the server that this client is prepared to handle
+                      expired password sandbox mode.
+
+Default options are read from the following files in the given order:
+/etc/opt/rh/rh-mysql57/my.cnf /etc/opt/rh/rh-mysql57/mysql/my.cnf ~/.my.cnf 
+The following groups are read: mysql client
+The following options may be given as the first argument:
+--print-defaults        Print the program argument list and exit.
+--no-defaults           Don't read default options from any option file,
+                        except for login file.
+--defaults-file=#       Only read default options from the given file #.
+--defaults-extra-file=# Read this file after the global files are read.
+--defaults-group-suffix=#
+                        Also read groups with concat(group, suffix)
+--login-path=#          Read this path from the login file.
+
+Variables (--variable-name=value)
+and boolean options {FALSE|TRUE}  Value (after reading options)
+--------------------------------- ----------------------------------------
+auto-rehash                       FALSE
+auto-vertical-output              FALSE
+bind-address                      (No default value)
+binary-as-hex                     FALSE
+character-sets-dir                (No default value)
+column-type-info                  FALSE
+comments                          FALSE
+compress                          FALSE
+database                          (No default value)
+default-character-set             auto
+delimiter                         ;
+enable-cleartext-plugin           FALSE
+vertical                          FALSE
+force                             FALSE
+histignore                        (No default value)
+named-commands                    FALSE
+ignore-spaces                     FALSE
+init-command                      (No default value)
+local-infile                      FALSE
+no-beep                           FALSE
+host                              workstation.lab.example.com
+html                              FALSE
+xml                               FALSE
+line-numbers                      TRUE
+unbuffered                        FALSE
+column-names                      TRUE
+sigint-ignore                     FALSE
+port                              13306
+prompt                            mysql> 
+quick                             FALSE
+raw                               FALSE
+reconnect                         FALSE
+socket                            (No default value)
+ssl                               TRUE
+ssl-verify-server-cert            FALSE
+ssl-ca                            (No default value)
+ssl-capath                        (No default value)
+ssl-cert                          (No default value)
+ssl-cipher                        (No default value)
+ssl-key                           (No default value)
+ssl-crl                           (No default value)
+ssl-crlpath                       (No default value)
+tls-version                       (No default value)
+server-public-key-path            (No default value)
+get-server-public-key             FALSE
+table                             FALSE
+user                              user1
+safe-updates                      FALSE
+i-am-a-dummy                      FALSE
+connect-timeout                   0
+max-allowed-packet                16777216
+net-buffer-length                 16384
+select-limit                      1000
+max-join-size                     1000000
+secure-auth                       TRUE
+show-warnings                     FALSE
+plugin-dir                        (No default value)
+default-auth                      (No default value)
+binary-mode                       FALSE
+connect-expired-password          FALSE
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec  mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 -e "insert into items.Item (description,done) values ("Finished lab",1);"' 
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1044 (42000): Access denied for user 'user1'@'%' to database 'lab,1);'
+exit status 1
+[student@workstation DO180-apps]$ sudo podman exec  mysql-2 /bin/bash -c 'mysql -uuser1 -pmypa55 -h workstation.lab.example.com -P13306 -e "insert into item^CItem (description,done) values ("Finished lab",1);"' 
+[student@workstation DO180-apps]$ mysql -uuser1 -h workstation.lab.example.com -pmypa55 -P13306 items
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 5.7.24 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MySQL [items]> insert into items.Item (description,done) values ("Finished lab",1);
+Query OK, 1 row affected (0.01 sec)
+
+MySQL [items]> exit
+Bye
+[student@workstation DO180-apps]$ sudo podman rm mysql-1
+b0c23adfd1f135878bbc1e6af04aa68c68fb52015587595f09f815d3f6645276
+[student@workstation DO180-apps]$ lab manage-review grade 
+
+Grading the student's work for the Lab: Managing Containers
+
+ · Checking if the /var/local/mysql folder exists..............  PASS
+ · Checking if owner was changed...............................  PASS
+ · Checking if the container mysql-1 was created...............  FAIL
+ · Checking if the mysql-2 container is running................  PASS
+ · Checking tables for the 'Finished lab' row..................  PASS
+[student@workstation DO180-apps]$ lab manage-review finish 
+
+Completing the Lab: Managing Containers
+
+ · Removing the /var/local/mysql folder........................  SUCCESS
+ · Removing the fcontext for /var/local/mysql..................  SUCCESS
+ · Stopping mysql-1 container..................................  SUCCESS
+ · Removing mysql-1 container..................................  SUCCESS
+ · Stopping mysql-2 container..................................  SUCCESS
+ · Removing mysql-2 container..................................  SUCCESS
+ · Removing MySQL container image..............................  SUCCESS
+ · Removing temporary file.....................................  SUCCESS
+[student@workstation DO180-apps]$ 
+

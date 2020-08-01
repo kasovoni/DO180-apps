@@ -2217,4 +2217,231 @@ Completing the Guided Exercise: Deploying a Database Server on OpenShift
 
 
 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc port-forward mysql-openshift-1-vl4r5 3306:3306
+Forwarding from 127.0.0.1:3306 -> 3306
+Forwarding from [::1]:3306 -> 3306
+Handling connection for 3306
+^C[student@workstation DO180-apps]$ oc delete project ${RHT_OCP4_DEV_USER}-mysql-openshift
+project.project.openshift.io "sila-kissuu-us-mysql-openshift" deleted
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ lab openshift-resources finish 
+
+Completing the Guided Exercise: Deploying a Database Server on OpenShift
+
+ · Deleting the 'sila-kissuu-us-mysql-openshift' project.......  SUCCESS
+[student@workstation DO180-apps]$ vi running.log 
+[student@workstation DO180-apps]$ !79
+git commit -a -m "updates"
+[master 8c52cf9] updates
+ 1 file changed, 238 insertions(+)
+[student@workstation DO180-apps]$ !80
+git push
+Counting objects: 5, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 3.79 KiB | 0 bytes/s, done.
+Total 3 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/kasovoni/DO180-apps
+   e6873f5..8c52cf9  master -> master
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ clear
+
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ lab openshift-routes start
+
+Setting up workstation for the Guided Exercise: Exposing a Service as a Route
+
+ Verifying the OpenShift cluster is running:
+ · Log in on OpenShift.........................................  SUCCESS
+ · Check the internal registry is up and running...............  SUCCESS
+ · Ensuring the 'sila-kissuu-us-route' project does not exist..  SUCCESS
+[student@workstation DO180-apps]$ source /usr/local/etc/ocp4.
+ocp4.config    ocp4.defaults  
+[student@workstation DO180-apps]$ source /usr/local/etc/ocp4.config 
+[student@workstation DO180-apps]$ cat /usr/local/etc/ocp4.defaults 
+RHT_OCP4_MODE=development
+RHT_OCP4_MASTER_API=https://api.cluster.domain.nextcle.com:6443
+RHT_OCP4_WILDCARD_DOMAIN=
+RHT_OCP4_NEXUS_SERVER=
+RHT_OCP4_CLUSTER_ID=
+RHT_OCP4_DEV_USER=ocpuser
+RHT_OCP4_DEV_PASSWORD=yourpassword
+RHT_OCP4_GITHUB_USER=gituser
+RHT_OCP4_QUAY_USER=quayuser
+[student@workstation DO180-apps]$ oc new-project ${RHT_OCP4_DEV_USER}-route
+Now using project "sila-kissuu-us-route" on server "https://api.ocp-na2.prod.nextcle.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app django-psql-example
+
+to build a new example application in Python. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+
+[student@workstation DO180-apps]$ oc new-app php:7.1~https://github.com/${RHT_OCP4_GITHUB_USER}/DO180-apps --context-dir php-helloworld --name php-helloworld
+--> Found image 8e01e80 (8 months old) in image stream "openshift/php" under tag "7.1" for "php:7.1"
+
+    Apache 2.4 with PHP 7.1 
+    ----------------------- 
+    PHP 7.1 available as container is a base platform for building and running various PHP 7.1 applications and frameworks. PHP is an HTML-embedded scripting language. PHP attempts to make it easy for developers to write dynamically generated web pages. PHP also offers built-in database integration for several commercial and non-commercial database management systems, so writing a database-enabled webpage with PHP is fairly simple. The most common use of PHP coding is probably as a replacement for CGI scripts.
+
+    Tags: builder, php, php71, rh-php71
+
+    * A source build using source code from https://github.com/kasovoni/DO180-apps will be created
+      * The resulting image will be pushed to image stream tag "php-helloworld:latest"
+      * Use 'oc start-build' to trigger a new build
+    * This image will be deployed in deployment config "php-helloworld"
+    * Ports 8080/tcp, 8443/tcp will be load balanced by service "php-helloworld"
+      * Other containers can access this service through the hostname "php-helloworld"
+
+--> Creating resources ...
+    imagestream.image.openshift.io "php-helloworld" created
+    buildconfig.build.openshift.io "php-helloworld" created
+    deploymentconfig.apps.openshift.io "php-helloworld" created
+    service "php-helloworld" created
+--> Success
+    Build scheduled, use 'oc logs -f bc/php-helloworld' to track its progress.
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose svc/php-helloworld' 
+    Run 'oc status' to view your app.
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc get po -w
+NAME                     READY   STATUS    RESTARTS   AGE
+php-helloworld-1-build   1/1     Running   0          17s
+^C[student@workstation DO180-apps]$ oc logs -f bc/php-helloworld
+Cloning "https://github.com/kasovoni/DO180-apps" ...
+	Commit:	8c52cf9d4fc5f33f96a7359e2760aa3feb6d4c02 (updates)
+	Author:	Student User <student@workstation.lab.example.com>
+	Date:	Sat Aug 1 18:54:27 2020 +0000
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:16df3eb2f02e0560f09ae997a937d135f747b970d5c2c9bf30b6de874827f3ba
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying config sha256:8e01e80b24124ddc69686179b836d01cb818bad93be2e59e13c3ab7b0ff16196
+Writing manifest to image destination
+Storing signatures
+Generating dockerfile with builder image image-registry.openshift-image-registry.svc:5000/openshift/php@sha256:289ef5852151a1a3ea4fdf2581a86a60ada0719e54a5ddd78f5252742e6d2b8d
+STEP 1: FROM image-registry.openshift-image-registry.svc:5000/openshift/php@sha256:289ef5852151a1a3ea4fdf2581a86a60ada0719e54a5ddd78f5252742e6d2b8d
+STEP 2: LABEL "io.openshift.build.source-context-dir"="php-helloworld" "io.openshift.build.image"="image-registry.openshift-image-registry.svc:5000/openshift/php@sha256:289ef5852151a1a3ea4fdf2581a86a60ada0719e54a5ddd78f5252742e6d2b8d" "io.openshift.build.commit.author"="Student User <student@workstation.lab.example.com>" "io.openshift.build.commit.date"="Sat Aug 1 18:54:27 2020 +0000" "io.openshift.build.commit.id"="8c52cf9d4fc5f33f96a7359e2760aa3feb6d4c02" "io.openshift.build.commit.ref"="master" "io.openshift.build.commit.message"="updates" "io.openshift.build.source-location"="https://github.com/kasovoni/DO180-apps"
+STEP 3: ENV OPENSHIFT_BUILD_NAME="php-helloworld-1" OPENSHIFT_BUILD_NAMESPACE="sila-kissuu-us-route" OPENSHIFT_BUILD_SOURCE="https://github.com/kasovoni/DO180-apps" OPENSHIFT_BUILD_COMMIT="8c52cf9d4fc5f33f96a7359e2760aa3feb6d4c02"
+STEP 4: USER root
+STEP 5: COPY upload/src /tmp/src
+STEP 6: RUN chown -R 1001:0 /tmp/src
+time="2020-08-01T19:33:04Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah160797968/mnt/rootfs\": error checking if \"/tmp/buildah160797968/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-01T19:33:04Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah160797968/mnt/rootfs\": error checking if \"/tmp/buildah160797968/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 7: USER 1001
+STEP 8: RUN /usr/libexec/s2i/assemble
+---> Installing application source...
+=> sourcing 20-copy-config.sh ...
+---> 19:33:06     Processing additional arbitrary httpd configuration provided by s2i ...
+=> sourcing 00-documentroot.conf ...
+=> sourcing 50-mpm-tuning.conf ...
+=> sourcing 40-ssl-certs.sh ...
+time="2020-08-01T19:33:06Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah536170877/mnt/rootfs\": error checking if \"/tmp/buildah536170877/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-01T19:33:06Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah536170877/mnt/rootfs\": error checking if \"/tmp/buildah536170877/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 9: CMD /usr/libexec/s2i/run
+STEP 10: COMMIT temp.builder.openshift.io/sila-kissuu-us-route/php-helloworld-1:e456da9b
+Getting image source signatures
+Copying blob sha256:a551fb857b61df88ae64cded378611456294ee7143bc068eb3a9ee1a29934658
+Copying blob sha256:08c4aa164cbaadfb32414e39d9b252a5382b9db1dd8e028fb11805074edbe608
+Copying blob sha256:7c6c57a17fb3de2b83515a0e33782d6d769fa90725da4eb75311e5ffbf601e49
+Copying blob sha256:c3b514cae9b11a6aadc78fdbb3d7b71226759927a8149f97ea400628744ad2c9
+Copying blob sha256:67ce50f5984a7a2ae8efd16c0dd2780e95982256be555d4e9a272357783ec338
+Copying blob sha256:0656f9534683c0b75fa383b235a48b73b53e4cae7f768626b79cd5d45cf37a19
+Copying config sha256:1866bc70690c0c7dc609a0e5639152dbdd9090d03a58393d417f90ad4d6ce189
+Writing manifest to image destination
+Storing signatures
+1866bc70690c0c7dc609a0e5639152dbdd9090d03a58393d417f90ad4d6ce189
+
+Pushing image image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-route/php-helloworld:latest ...
+Getting image source signatures
+Copying blob sha256:0656f9534683c0b75fa383b235a48b73b53e4cae7f768626b79cd5d45cf37a19
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:16df3eb2f02e0560f09ae997a937d135f747b970d5c2c9bf30b6de874827f3ba
+Copying config sha256:1866bc70690c0c7dc609a0e5639152dbdd9090d03a58393d417f90ad4d6ce189
+Writing manifest to image destination
+Storing signatures
+Successfully pushed image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-route/php-helloworld@sha256:874226d3bd0a02f45b2fcacfdf89c9744d01a41aac567fb5ae6d8a718af11b33
+Push successful
+[student@workstation DO180-apps]$ oc logs -f cc/php-helloworld
+error: the server doesn't have a resource type "cc"
+[student@workstation DO180-apps]$ ^C
+[student@workstation DO180-apps]$ oc logs -f dc/php-helloworld
+--> Scaling php-helloworld-1 to 1
+--> Success
+[student@workstation DO180-apps]$ oc describe svc/php-helloworld
+Name:              php-helloworld
+Namespace:         sila-kissuu-us-route
+Labels:            app=php-helloworld
+Annotations:       openshift.io/generated-by: OpenShiftNewApp
+Selector:          app=php-helloworld,deploymentconfig=php-helloworld
+Type:              ClusterIP
+IP:                172.30.14.84
+Port:              8080-tcp  8080/TCP
+TargetPort:        8080/TCP
+Endpoints:         10.129.9.19:8080
+Port:              8443-tcp  8443/TCP
+TargetPort:        8443/TCP
+Endpoints:         10.129.9.19:8443
+Session Affinity:  None
+Events:            <none>
+[student@workstation DO180-apps]$ oc expose svc/php-helloworld
+route.route.openshift.io/php-helloworld exposed
+[student@workstation DO180-apps]$ oc get route svc/php-helloworld
+error: there is no need to specify a resource type as a separate argument when passing arguments in resource/name form (e.g. 'oc get resource/<resource_name>' instead of 'oc get resource resource/<resource_name>'
+[student@workstation DO180-apps]$ curl php-helloworld-${RHT_OCP4_DEV_USER}-route.${RHT_OCP4_WILDCARD_DOMAIN}
+Hello, World! php version is 7.1.30
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc delete route/php-helloworld
+route.route.openshift.io "php-helloworld" deleted
+[student@workstation DO180-apps]$ oc expose svc/php-helloworld
+route.route.openshift.io/php-helloworld exposed
+[student@workstation DO180-apps]$ oc expose svc/php-helloworld --name=${RHT_OCP4_DEV_USER}-xyz
+route.route.openshift.io/sila-kissuu-us-xyz exposed
+[student@workstation DO180-apps]$ oc delete route/php-helloworld
+route.route.openshift.io "php-helloworld" deleted
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc describe route
+Name:			sila-kissuu-us-xyz
+Namespace:		sila-kissuu-us-route
+Created:		26 seconds ago
+Labels:			app=php-helloworld
+Annotations:		openshift.io/host.generated=true
+Requested Host:		sila-kissuu-us-xyz-sila-kissuu-us-route.apps.ocp-na2.prod.nextcle.com
+			  exposed on router default (host apps.ocp-na2.prod.nextcle.com) 26 seconds ago
+Path:			<none>
+TLS Termination:	<none>
+Insecure Policy:	<none>
+Endpoint Port:		8080-tcp
+
+Service:	php-helloworld
+Weight:		100 (100%)
+Endpoints:	10.129.9.19:8443, 10.129.9.19:8080
+[student@workstation DO180-apps]$ curl ${RHT_OCP4_DEV_USER}-xyz-${RHT_OCP4_DEV_USER}-route.${RHT_OCP4_WILDCARD_DOMAIN}
+Hello, World! php version is 7.1.30
+[student@workstation DO180-apps]$ lab openshift-routes finish 
+
+Completing the Guided Exercise: Exposing a Service as a Route
+
+ · Removing OpenShift project 'sila-kissuu-us-route'...........  SUCCESS
+[student@workstation DO180-apps]$ 
+
+
 

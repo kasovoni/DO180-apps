@@ -1539,3 +1539,444 @@ Completing the Lab: Managing Containers
  · Removing temporary file.....................................  SUCCESS
 [student@workstation DO180-apps]$ 
 
+
+==============================
+#4. Lab: Managing Images
+=============================
+[student@workstation DO180-apps]$ sudo podman search docker.io/nginx
+INDEX       NAME                                         DESCRIPTION                                       STARS   OFFICIAL   AUTOMATED
+docker.io   docker.io/library/nginx                      Official build of Nginx.                          13543   [OK]       
+docker.io   docker.io/jwilder/nginx-proxy                Automated Nginx reverse proxy for docker con...   1851               [OK]
+docker.io   docker.io/bitnami/nginx                      Bitnami nginx Docker Image                        88                 [OK]
+docker.io   docker.io/richarvey/nginx-php-fpm            Container running Nginx + PHP-FPM capable of...   780                [OK]
+docker.io   docker.io/nginx/nginx-ingress                NGINX Ingress Controller for Kubernetes           37                 
+docker.io   docker.io/nginxinc/nginx-unprivileged        Unprivileged NGINX Dockerfiles                    16                 
+docker.io   docker.io/nginxdemos/hello                   NGINX webserver that serves a simple page co...   58                 [OK]
+docker.io   docker.io/mailu/nginx                        Mailu nginx frontend                              7                  [OK]
+docker.io   docker.io/linuxserver/nginx                  An Nginx container, brought to you by LinuxS...   123                
+docker.io   docker.io/jlesage/nginx-proxy-manager        Docker container for Nginx Proxy Manager          53                 [OK]
+docker.io   docker.io/privatebin/nginx-fpm-alpine        PrivateBin running on an Nginx, php-fpm & Al...   31                 [OK]
+docker.io   docker.io/nginx/nginx-prometheus-exporter    NGINX Prometheus Exporter                         14                 
+docker.io   docker.io/schmunk42/nginx-redirect           A very simple container to redirect HTTP tra...   18                 [OK]
+docker.io   docker.io/bitnami/nginx-ingress-controller   Bitnami Docker Image for NGINX Ingress Contr...   6                  [OK]
+docker.io   docker.io/wodby/nginx                        Generic nginx                                     1                  [OK]
+docker.io   docker.io/ansibleplaybookbundle/nginx-apb    An APB to deploy NGINX                            1                  [OK]
+docker.io   docker.io/jc21/nginx-proxy-manager           Docker container for managing Nginx proxy ho...   74                 
+docker.io   docker.io/centos/nginx-112-centos7           Platform for running nginx 1.12 or building ...   13                 
+docker.io   docker.io/centos/nginx-18-centos7            Platform for running nginx 1.8 or building n...   13                 
+docker.io   docker.io/tiangolo/nginx-rtmp                Docker image with Nginx using the nginx-rtmp...   85                 [OK]
+docker.io   docker.io/alfg/nginx-rtmp                    NGINX, nginx-rtmp-module and FFmpeg from sou...   71                 [OK]
+docker.io   docker.io/raulr/nginx-wordpress              Nginx front-end for the official wordpress:f...   13                 [OK]
+docker.io   docker.io/sophos/nginx-vts-exporter          Simple server that scrapes Nginx vts stats a...   7                  [OK]
+docker.io   docker.io/bitwarden/nginx                    The Bitwarden nginx web server acting as a r...   7                  
+docker.io   docker.io/flashspys/nginx-static             Super Lightweight Nginx Image                     6                  [OK]
+[student@workstation DO180-apps]$ sudo podman pull docker.io/nginx:1.17
+Trying to pull docker.io/nginx:1.17...Getting image source signatures
+Copying blob sha256:afb6ec6fdc1c3ba04f7a56db32c5ff5ff38962dc4cd0ffdef5beaa0ce2eb77e2
+ 25.84 MB / 25.84 MB [======================================================] 1s
+Copying blob sha256:b90c53a0b69244e37b3f8672579fc3dec13293eeb574fa0fdddf02da1e192fd6
+ 22.81 MB / 22.81 MB [======================================================] 0s
+Copying blob sha256:11fa52a0fdc084d7fc3bbcb774389fd37b148ee98e7829cea4af189735acf848
+ 203 B / 203 B [============================================================] 0s
+Copying config sha256:9beeba249f3ee158d3e495a6ac25c5667ae2de8a43ac2a8bfd2bf687a58c06c9
+ 6.51 KB / 6.51 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+9beeba249f3ee158d3e495a6ac25c5667ae2de8a43ac2a8bfd2bf687a58c06c9
+[student@workstation DO180-apps]$ sudo podman images
+REPOSITORY                TAG    IMAGE ID       CREATED        SIZE
+docker.io/library/nginx   1.17   9beeba249f3e   2 months ago   131MB
+[student@workstation DO180-apps]$ sudo podman run --name official-nginx -d -p 8080:80 docker.io/nginx:1.17
+6ec0c775ee699f629dd2021b8662393dab3ea16354a433bde57aa07a2289e386
+[student@workstation DO180-apps]$ sudo podman exec -it official-nginx /bin/bash
+root@6ec0c775ee69:/# echo "DO180" >/usr/share/nginx/html/index.html 
+root@6ec0c775ee69:/# exit
+exit
+[student@workstation DO180-apps]$ curl 127.0.0.1:8080
+DO180
+[student@workstation DO180-apps]$ sudo postman stop official-nginx
+sudo: postman: command not found
+[student@workstation DO180-apps]$ sudo podman stop official-nginx
+6ec0c775ee699f629dd2021b8662393dab3ea16354a433bde57aa07a2289e386
+[student@workstation DO180-apps]$ sudo podman run --name official-nginx -d -p 8080:80 docker.io/nginx:1.17^C
+[student@workstation DO180-apps]$ sudo podman commit -a 'Sila' official-nginx do180/mynginx:v1.0-SNAPSHOT
+Getting image source signatures
+Skipping fetch of repeat blob sha256:ffc9b21953f4cd7956cdf532a5db04ff0a2daa7475ad796f1bad58cfbaf77a07
+Skipping fetch of repeat blob sha256:2f4accd375d93db49e5a47c9bebe4e0dd3cef35f765f5cd36840a986435affc9
+Skipping fetch of repeat blob sha256:6c7de695ede33d90077f01d60ec29e6a51552a3e350757018ff1b1ecd6cee0bf
+Copying blob sha256:1ef6da3415cddc44118baaa9ac0367a808aca09709474510aea0fa80bd6cc12f
+ 12.00 KB / 12.00 KB [======================================================] 0s
+Copying config sha256:4e85d833b2a69da9a5b03b509f82051949cb88e4baedd6c0f4233f775b3d67a6
+ 5.63 KB / 5.63 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+4e85d833b2a69da9a5b03b509f82051949cb88e4baedd6c0f4233f775b3d67a6
+[student@workstation DO180-apps]$ sudo su -
+[root@workstation ~]# podman ps
+[root@workstation ~]# exit
+logout
+[student@workstation DO180-apps]$ sudo podman ps
+[student@workstation DO180-apps]$ sudo su -
+Last login: Sat Aug  1 17:52:24 UTC 2020 on pts/0
+[root@workstation ~]# podman images
+REPOSITORY                TAG             IMAGE ID       CREATED          SIZE
+localhost/do180/mynginx   v1.0-SNAPSHOT   4e85d833b2a6   45 seconds ago   131MB
+docker.io/library/nginx   1.17            9beeba249f3e   2 months ago     131MB
+[root@workstation ~]# exit
+logout
+[student@workstation DO180-apps]$ sudo podman run --name official-nginx-dev -d -p 8080:80 do180/mynginx:v1.0-SNAPSHOT
+930e1a87fd36e7fafcb270c5c081bc417bd56bed3c736035df6a5dae9da4a34a
+[student@workstation DO180-apps]$ sudo podman exec -it official-nginx-dev /bin/bash
+root@930e1a87fd36:/# echo "DO180 Page" >/usr/share/nginx/html/index.html 
+root@930e1a87fd36:/# exit
+exit
+[student@workstation DO180-apps]$ history |grep curl
+   18  curl http://localhost:8080
+  143  curl 127.0.0.1:8080
+  152  history |grep curl
+[student@workstation DO180-apps]$ !143
+curl 127.0.0.1:8080
+DO180 Page
+[student@workstation DO180-apps]$ sudo podman stop official-nginx-dev
+930e1a87fd36e7fafcb270c5c081bc417bd56bed3c736035df6a5dae9da4a34a
+[student@workstation DO180-apps]$ sudo podman commit -a 'Sila' do180/mynginx:v1.0
+you must provide a container name or ID and a target image name
+[student@workstation DO180-apps]$ sudo podman commit -a 'Sila' official-nginx-dev do180/mynginx:v1.0
+Getting image source signatures
+Skipping fetch of repeat blob sha256:ffc9b21953f4cd7956cdf532a5db04ff0a2daa7475ad796f1bad58cfbaf77a07
+Skipping fetch of repeat blob sha256:2f4accd375d93db49e5a47c9bebe4e0dd3cef35f765f5cd36840a986435affc9
+Skipping fetch of repeat blob sha256:6c7de695ede33d90077f01d60ec29e6a51552a3e350757018ff1b1ecd6cee0bf
+Skipping fetch of repeat blob sha256:1ef6da3415cddc44118baaa9ac0367a808aca09709474510aea0fa80bd6cc12f
+Copying blob sha256:bb7b1abf3ef2925c803efedf30317c88b063ae0ba12c896d18a5bd6cfbfff18a
+ 6.00 KB / 6.00 KB [========================================================] 0s
+Copying config sha256:16c8fbada55a9b7802b2489fca144c58a76c6662258b61b2b3a4c0e7ef55197d
+ 5.76 KB / 5.76 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+16c8fbada55a9b7802b2489fca144c58a76c6662258b61b2b3a4c0e7ef55197d
+[student@workstation DO180-apps]$ sudo podman images
+REPOSITORY                TAG             IMAGE ID       CREATED          SIZE
+localhost/do180/mynginx   v1.0            16c8fbada55a   23 seconds ago   131MB
+localhost/do180/mynginx   v1.0-SNAPSHOT   4e85d833b2a6   5 minutes ago    131MB
+docker.io/library/nginx   1.17            9beeba249f3e   2 months ago     131MB
+[student@workstation DO180-apps]$ sudo podman ps -a
+CONTAINER ID   IMAGE                                   COMMAND                CREATED          STATUS                     PORTS                  NAMES                IS INFRA
+930e1a87fd36   localhost/do180/mynginx:v1.0-SNAPSHOT   nginx -g daemon off;   4 minutes ago    Exited (0) 2 minutes ago   0.0.0.0:8080->80/tcp   official-nginx-dev   false
+6ec0c775ee69   docker.io/library/nginx:1.17            nginx -g daemon off;   10 minutes ago   Exited (0) 8 minutes ago   0.0.0.0:8080->80/tcp   official-nginx       false
+[student@workstation DO180-apps]$ sudo podman ps -a --format="{{.ID}} {{.Names}} {{.Status}}"
+930e1a87fd36   official-nginx-dev   Exited (0) 3 minutes ago
+6ec0c775ee69   official-nginx       Exited (0) 9 minutes ago
+[student@workstation DO180-apps]$ sudo podman rm official-nginx-dev
+930e1a87fd36e7fafcb270c5c081bc417bd56bed3c736035df6a5dae9da4a34a
+[student@workstation DO180-apps]$ sudo podman ps -a --format="{{.ID}} {{.Names}} {{.Status}}"
+6ec0c775ee69   official-nginx   Exited (0) 9 minutes ago
+[student@workstation DO180-apps]$ sudo podman rm official-nginx-dev^C
+[student@workstation DO180-apps]$ sudo postman images
+sudo: postman: command not found
+[student@workstation DO180-apps]$ sudo podman images
+REPOSITORY                TAG             IMAGE ID       CREATED         SIZE
+localhost/do180/mynginx   v1.0            16c8fbada55a   2 minutes ago   131MB
+localhost/do180/mynginx   v1.0-SNAPSHOT   4e85d833b2a6   8 minutes ago   131MB
+docker.io/library/nginx   1.17            9beeba249f3e   2 months ago    131MB
+[student@workstation DO180-apps]$ sudo rmi do180/mynginx:v1.0-SNAPSHOT
+sudo: rmi: command not found
+[student@workstation DO180-apps]$ sudo podman rmi do180/mynginx:v1.0-SNAPSHOT
+Untagged: localhost/do180/mynginx:v1.0-SNAPSHOT
+[student@workstation DO180-apps]$ sudo podman images
+REPOSITORY                TAG    IMAGE ID       CREATED         SIZE
+localhost/do180/mynginx   v1.0   16c8fbada55a   3 minutes ago   131MB
+docker.io/library/nginx   1.17   9beeba249f3e   2 months ago    131MB
+[student@workstation DO180-apps]$ sudo podman run -d --name my-nginx -p8280:80 do180/mynginx:v1.0
+flag provided but not defined: -p8280:80
+See 'podman run --help'.
+[student@workstation DO180-apps]$ sudo podman run -d --name my-nginx -p 8280:80 do180/mynginx:v1.0
+ce5bed3a02b2cdc336ad7c94e615e69669a25afd6013eb3eb720af5330f593a7
+[student@workstation DO180-apps]$ curl 127.0.0.1:8080
+curl: (7) Failed connect to 127.0.0.1:8080; Connection refused
+[student@workstation DO180-apps]$ curl 127.0.0.1:8280
+DO180 Page
+[student@workstation DO180-apps]$ lab image-review grade 
+
+Grading the student's work for the Lab: Managing Images
+
+ · Nginx container image is pulled.............................  PASS
+ · Container official-nginx is created.........................  PASS
+ · Container official-nginx is stopped.........................  PASS
+ · Tag do180/mynginx:v1.0-SNAPSHOT is removed..................  PASS
+ · Tag do180/mynginx:v1.0 is created...........................  PASS
+ · Container my-nginx is created and running...................  PASS
+ · index.html is available with the custom content.............  PASS
+[student@workstation DO180-apps]$ lab image-review f
+Missing or unrecognized command - f
+This script controls the setup and grading of this lab.
+Usage: lab image-review COMMAND
+       lab image-review -h|--help
+
+COMMAND is one of: start grade finish
+
+[student@workstation DO180-apps]$ lab image-review finish 
+
+Completing the Lab: Managing Images
+
+ · Stopping official-nginx-dev container.......................  SUCCESS
+ · Removing official-nginx-dev container.......................  SUCCESS
+ · Stopping official-nginx container...........................  SUCCESS
+ · Removing official-nginx container...........................  SUCCESS
+ · Removing do180/mynginx:v1.0 image...........................  SUCCESS
+ · Removing docker.io/library/nginx:1.17 image.................  SUCCESS
+[student@workstation DO180-apps]$ 
+
+
+
+Getting image source signatures
+Skipping fetch of repeat blob sha256:5601485f01090b2ed055cfcbc1c36eb5acc39a57b80209a8d9f9ab34b2d457da
+Skipping fetch of repeat blob sha256:ac7577b8c383fcc22ec383df5fb565a2eaf59f00685d4a980bb54428e034ce2f
+Copying blob sha256:07d09c6d861bfed4486e78a9aea68136ddf19e5556fd9a7ad61d8b59281730f3
+ 18.70 MB / 18.70 MB [======================================================] 0s
+Copying config sha256:1dc339d2789d524438dfbe5d2722c6c393ef35b24eaf602992c14a65b9535e7b
+ 1.95 KB / 1.95 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+--> 1dc339d2789d524438dfbe5d2722c6c393ef35b24eaf602992c14a65b9535e7b
+[student@workstation dockerfile-create]$ sudo podman images
+REPOSITORY                            TAG      IMAGE ID       CREATED          SIZE
+localhost/do180/apache                latest   1dc339d2789d   18 seconds ago   247MB
+registry.access.redhat.com/ubi7/ubi   7.7      0355cd652bd1   4 months ago     215MB
+[student@workstation dockerfile-create]$ sudo podman run --name lab-apache -d -p 10080:80 do180/apache
+5cbd26316ce391f50470beb4fca285bf9ddafbce6cfee3a15f54fd65d9614540
+[student@workstation dockerfile-create]$ sudo podman ps
+CONTAINER ID   IMAGE                           COMMAND               CREATED         STATUS             PORTS                   NAMES
+5cbd26316ce3   localhost/do180/apache:latest   httpd -D FOREGROUND   6 seconds ago   Up 5 seconds ago   0.0.0.0:10080->80/tcp   lab-apache
+[student@workstation dockerfile-create]$ curl 127.0.0.1:10080
+Hello from Dockerfile
+[student@workstation dockerfile-create]$ lab dockerfile-create finish 
+
+Completing the Guided Exercise: Building a basic Apache Container Image
+
+ · Stopping lab-apache container that is running...............  SUCCESS
+ · Removing lab-apache container that is in the cache..........  SUCCESS
+ · Removing do180/apache custom container image................  SUCCESS
+ · Removing UBI7 container image...............................  SUCCESS
+[student@workstation dockerfile-create]$ clear
+
+[student@workstation dockerfile-create]$ 
+[student@workstation dockerfile-create]$ 
+[student@workstation dockerfile-create]$ 
+[student@workstation dockerfile-create]$ lab dockerfile-review start 
+
+Setting up workstation for the Lab: Creating Custom Container Images
+
+ · Checking podman configuration...............................  SUCCESS
+ · Checking if the container exists or is running..............  SUCCESS
+ · Downloading starter project.................................  SUCCESS
+ · Downloading solution project................................  SUCCESS
+
+Setup successful. Please proceed with the exercise.
+
+[student@workstation dockerfile-create]$ cd ../dockerfile-review/
+[student@workstation dockerfile-review]$ ls
+Dockerfile  src  training.repo
+[student@workstation dockerfile-review]$ vi Dockerfile 
+[student@workstation dockerfile-review]$ sudo podman build --layers=false -t do180/custom-apache .
+STEP 1: FROM ubi7/ubi7:7
+error creating build container: The following failures happened while trying to pull image specified by "ubi7/ubi7:7" based on search registries in /etc/containers/registries.conf:
+* "localhost/ubi7/ubi7:7": Error determining manifest MIME type for docker://localhost/ubi7/ubi7:7: pinging docker registry returned: Get https://localhost/v2/: dial tcp [::1]:443: connect: connection refused
+* "registry.access.redhat.com/ubi7/ubi7:7": Error determining manifest MIME type for docker://registry.access.redhat.com/ubi7/ubi7:7: Error reading manifest 7 in registry.access.redhat.com/ubi7/ubi7: name unknown: Repo not found
+* "quay.io/ubi7/ubi7:7": Error determining manifest MIME type for docker://quay.io/ubi7/ubi7:7: Error reading manifest 7 in quay.io/ubi7/ubi7: unauthorized: access to the requested resource is not authorized
+[student@workstation dockerfile-review]$ vi Dockerfile 
+[student@workstation dockerfile-review]$ sudo podman build --layers=false -t do180/custom-apache .
+STEP 1: FROM ubi7/ubi:7.7
+Getting image source signatures
+Copying blob sha256:fcd63ccfdd0ccd78cc0b23a6e9cef0c400625c1506f3eed694d92c7ced04b4c4
+ 72.72 MB / ? [------=-----------------------------------------------------] 4s 
+Copying blob sha256:09dbbf8834d2d84d8d8a37dcf7d6049794c9c8c604a3d3f2606768a82771438d
+ 1.57 KB / ? [-------------------------------------------------------------=] 0s
+Copying config sha256:0355cd652bd1c4afd8d8f2cd8d0a4887196cb4808b8f803e146ec266ecdd5aa2
+ 4.32 KB / 4.32 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+STEP 2: MAINTAINER username <username@example.com>
+STEP 3: ENV PORT 8080
+STEP 4: RUN yum install -y httpd && yum clean all
+Loaded plugins: ovl, product-id, search-disabled-repos, subscription-manager
+This system is not receiving updates. You can use subscription-manager on the host to register and assign subscriptions.
+ubi-7                                                    | 3.8 kB     00:00     
+ubi-7-rhah                                               | 3.7 kB     00:00     
+ubi-7-server-devtools-rpms                               | 3.8 kB     00:00     
+ubi-7-server-extras-rpms                                 | 3.7 kB     00:00     
+ubi-7-server-optional-rpms                               | 3.8 kB     00:00     
+ubi-server-rhscl-7-rpms                                  | 3.8 kB     00:00     
+(1/18): ubi-7/x86_64/updateinfo                            |   92 B   00:00     
+(2/18): ubi-7/x86_64/primary_db                            | 797 kB   00:00     
+(3/18): ubi-7/x86_64/group                                 |  124 B   00:00     
+(4/18): ubi-7-rhah/x86_64/updateinfo                       |   92 B   00:00     
+(5/18): ubi-7-rhah/x86_64/primary_db                       | 2.5 kB   00:00     
+(6/18): ubi-7-server-devtools-rpms/x86_64/updateinfo       |   92 B   00:00     
+(7/18): ubi-7-server-devtools-rpms/x86_64/primary_db       | 8.6 kB   00:00     
+(8/18): ubi-7-rhah/x86_64/group                            |  124 B   00:00     
+(9/18): ubi-7-server-devtools-rpms/x86_64/group            |  124 B   00:00     
+(10/18): ubi-7-server-extras-rpms/x86_64/updateinfo        |   92 B   00:00     
+(11/18): ubi-7-server-extras-rpms/x86_64/primary_db        | 6.7 kB   00:00     
+(12/18): ubi-7-server-extras-rpms/x86_64/group             |  124 B   00:00     
+(13/18): ubi-7-server-optional-rpms/x86_64/updateinfo      |   92 B   00:00     
+(14/18): ubi-7-server-optional-rpms/x86_64/primary_db      |  14 kB   00:00     
+(15/18): ubi-server-rhscl-7-rpms/x86_64/updateinfo         |   92 B   00:00     
+(16/18): ubi-server-rhscl-7-rpms/x86_64/primary_db         | 260 kB   00:00     
+(17/18): ubi-7-server-optional-rpms/x86_64/group           |  124 B   00:00     
+(18/18): ubi-server-rhscl-7-rpms/x86_64/group              |  124 B   00:00     
+Resolving Dependencies
+--> Running transaction check
+---> Package httpd.x86_64 0:2.4.6-93.el7 will be installed
+--> Processing Dependency: httpd-tools = 2.4.6-93.el7 for package: httpd-2.4.6-93.el7.x86_64
+--> Processing Dependency: system-logos >= 7.92.1-1 for package: httpd-2.4.6-93.el7.x86_64
+--> Processing Dependency: /etc/mime.types for package: httpd-2.4.6-93.el7.x86_64
+--> Processing Dependency: libapr-1.so.0()(64bit) for package: httpd-2.4.6-93.el7.x86_64
+--> Processing Dependency: libaprutil-1.so.0()(64bit) for package: httpd-2.4.6-93.el7.x86_64
+--> Running transaction check
+---> Package apr.x86_64 0:1.4.8-5.el7 will be installed
+---> Package apr-util.x86_64 0:1.5.2-6.el7 will be installed
+---> Package httpd-tools.x86_64 0:2.4.6-93.el7 will be installed
+---> Package mailcap.noarch 0:2.1.41-2.el7 will be installed
+---> Package redhat-logos.noarch 0:70.7.0-1.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package              Arch           Version                Repository     Size
+================================================================================
+Installing:
+ httpd                x86_64         2.4.6-93.el7           ubi-7         1.2 M
+Installing for dependencies:
+ apr                  x86_64         1.4.8-5.el7            ubi-7         104 k
+ apr-util             x86_64         1.5.2-6.el7            ubi-7          92 k
+ httpd-tools          x86_64         2.4.6-93.el7           ubi-7          92 k
+ mailcap              noarch         2.1.41-2.el7           ubi-7          31 k
+ redhat-logos         noarch         70.7.0-1.el7           ubi-7          13 M
+
+Transaction Summary
+================================================================================
+Install  1 Package (+5 Dependent packages)
+
+Total download size: 15 M
+Installed size: 18 M
+Downloading packages:
+warning: /var/cache/yum/x86_64/7Server/ubi-7/packages/apr-1.4.8-5.el7.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID fd431d51: NOKEY
+Public key for apr-1.4.8-5.el7.x86_64.rpm is not installed
+(1/6): apr-1.4.8-5.el7.x86_64.rpm                          | 104 kB   00:00     
+(2/6): apr-util-1.5.2-6.el7.x86_64.rpm                     |  92 kB   00:00     
+(3/6): httpd-2.4.6-93.el7.x86_64.rpm                       | 1.2 MB   00:00     
+(4/6): httpd-tools-2.4.6-93.el7.x86_64.rpm                 |  92 kB   00:00     
+(5/6): redhat-logos-70.7.0-1.el7.noarch.rpm                |  13 MB   00:00     
+(6/6): mailcap-2.1.41-2.el7.noarch.rpm                     |  31 kB   00:00     
+--------------------------------------------------------------------------------
+Total                                               28 MB/s |  15 MB  00:00     
+Retrieving key from file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+Importing GPG key 0xFD431D51:
+ Userid     : "Red Hat, Inc. (release key 2) <security@redhat.com>"
+ Fingerprint: 567e 347a d004 4ade 55ba 8a5f 199e 2f91 fd43 1d51
+ Package    : redhat-release-server-7.7-10.el7.x86_64 (@anaconda/7.7)
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+Importing GPG key 0x2FA658E0:
+ Userid     : "Red Hat, Inc. (auxiliary key) <security@redhat.com>"
+ Fingerprint: 43a6 e49c 4a38 f4be 9abf 2a53 4568 9c88 2fa6 58e0
+ Package    : redhat-release-server-7.7-10.el7.x86_64 (@anaconda/7.7)
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : apr-1.4.8-5.el7.x86_64                                       1/6 
+  Installing : apr-util-1.5.2-6.el7.x86_64                                  2/6 
+  Installing : httpd-tools-2.4.6-93.el7.x86_64                              3/6 
+  Installing : redhat-logos-70.7.0-1.el7.noarch                             4/6 
+  Installing : mailcap-2.1.41-2.el7.noarch                                  5/6 
+  Installing : httpd-2.4.6-93.el7.x86_64                                    6/6 
+  Verifying  : mailcap-2.1.41-2.el7.noarch                                  1/6 
+  Verifying  : apr-util-1.5.2-6.el7.x86_64                                  2/6 
+  Verifying  : apr-1.4.8-5.el7.x86_64                                       3/6 
+  Verifying  : httpd-2.4.6-93.el7.x86_64                                    4/6 
+  Verifying  : redhat-logos-70.7.0-1.el7.noarch                             5/6 
+  Verifying  : httpd-tools-2.4.6-93.el7.x86_64                              6/6 
+
+Installed:
+  httpd.x86_64 0:2.4.6-93.el7                                                   
+
+Dependency Installed:
+  apr.x86_64 0:1.4.8-5.el7                  apr-util.x86_64 0:1.5.2-6.el7       
+  httpd-tools.x86_64 0:2.4.6-93.el7         mailcap.noarch 0:2.1.41-2.el7       
+  redhat-logos.noarch 0:70.7.0-1.el7       
+
+Complete!
+Loaded plugins: ovl, product-id, search-disabled-repos, subscription-manager
+This system is not receiving updates. You can use subscription-manager on the host to register and assign subscriptions.
+Cleaning repos: ubi-7 ubi-7-rhah ubi-7-server-devtools-rpms
+              : ubi-7-server-extras-rpms ubi-7-server-optional-rpms
+              : ubi-server-rhscl-7-rpms
+STEP 5: RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf &&     chown -R apache:apache /etc/httpd/logs/ &&     chown -R apache:apache /run/httpd/
+STEP 6: USER apache
+STEP 7: EXPOSE ${PORT}
+STEP 8: COPY ./src /var/www/html
+STEP 9: CMD ["httpd", "-D", "FOREGROUND"]
+ERRO[0022] HOSTNAME is not supported for OCI image format, hostname 1a6370b10892 will be ignored. Must use `docker` format 
+STEP 10: COMMIT containers-storage:[overlay@/var/lib/containers/storage+/var/run/containers/storage:overlay.override_kernel_check=true]localhost/do180/custom-apache:latest
+Getting image source signatures
+Skipping fetch of repeat blob sha256:5601485f01090b2ed055cfcbc1c36eb5acc39a57b80209a8d9f9ab34b2d457da
+Skipping fetch of repeat blob sha256:ac7577b8c383fcc22ec383df5fb565a2eaf59f00685d4a980bb54428e034ce2f
+Copying blob sha256:79e089c9104c484fa1cb04190b8904d79b5fea82bed9fc62087e1da6ff4fb945
+ 18.70 MB / 18.70 MB [======================================================] 0s
+Copying config sha256:a6acdaba320e107890afbbc6caa9281fedf2823929e617c4cb80d303085a5165
+ 2.28 KB / 2.28 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+--> a6acdaba320e107890afbbc6caa9281fedf2823929e617c4cb80d303085a5165
+[student@workstation dockerfile-review]$ s
+bash: s: command not found...
+[student@workstation dockerfile-review]$ 
+[student@workstation dockerfile-review]$ 
+[student@workstation dockerfile-review]$ 
+[student@workstation dockerfile-review]$ sudo podman images
+REPOSITORY                            TAG      IMAGE ID       CREATED          SIZE
+localhost/do180/custom-apache         latest   a6acdaba320e   12 seconds ago   247MB
+registry.access.redhat.com/ubi7/ubi   7.7      0355cd652bd1   4 months ago     215MB
+[student@workstation dockerfile-review]$ 
+[student@workstation dockerfile-review]$ 
+[student@workstation dockerfile-review]$ sudo podman run -d --name dockerfile -p20080:8080 do180/custom-apache
+flag provided but not defined: -p20080:8080
+See 'podman run --help'.
+[student@workstation dockerfile-review]$ sudo podman run -d --name dockerfile -p 20080:8080 do180/custom-apache
+f1b7ef75e83237760592cbd6c47b970fe148c1dbf547b3c73cc5d2a3b2f3bcb9
+[student@workstation dockerfile-review]$ sudo poman ps
+sudo: poman: command not found
+[student@workstation dockerfile-review]$ sudo podman ps
+CONTAINER ID   IMAGE                                  COMMAND               CREATED          STATUS              PORTS                     NAMES
+f1b7ef75e832   localhost/do180/custom-apache:latest   httpd -D FOREGROUND   17 seconds ago   Up 16 seconds ago   0.0.0.0:20080->8080/tcp   dockerfile
+[student@workstation dockerfile-review]$ curl 127.0.0.1:20080
+<html>
+ <header><title>DO180 Hello!</title></header>
+ <body>
+   Hello World! The dockerfile-review lab works!
+ </body>
+</html>
+[student@workstation dockerfile-review]$ lab dockerfile-review grade 
+
+Grading the student's work for Lab: Creating Custom Container Images
+
+ · Check for apache container image............................  PASS
+ · Check if the container is running...........................  PASS
+ · Verifying if httpd was installed correctly in apache image..  PASS
+ · Verifying if hello world is running on server...............  PASS
+ · Stopping grade container....................................  SUCCESS
+ · Removing grade container....................................  SUCCESS
+
+[student@workstation dockerfile-review]$ lab dockerfile-review finish 
+
+Completing the Lab: Creating Custom Container Images
+
+ · Stopping running container..................................  SUCCESS
+ · Removing the container......................................  SUCCESS
+ · Removing do180/custom-apache container image................  SUCCESS
+ · Removing ubi7 container image...............................  SUCCESS
+
+[student@workstation dockerfile-review]$ 
+

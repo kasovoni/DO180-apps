@@ -2444,4 +2444,416 @@ Completing the Guided Exercise: Exposing a Service as a Route
 [student@workstation DO180-apps]$ 
 
 
+[student@workstation DO180-apps]$ oc expose svc/php-helloworld --name=${RHT_OCP4_DEV_USER}-xyz
+route.route.openshift.io/sila-kissuu-us-xyz exposed
+[student@workstation DO180-apps]$ oc delete route/php-helloworld
+route.route.openshift.io "php-helloworld" deleted
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc describe route
+Name:			sila-kissuu-us-xyz
+Namespace:		sila-kissuu-us-route
+Created:		26 seconds ago
+Labels:			app=php-helloworld
+Annotations:		openshift.io/host.generated=true
+Requested Host:		sila-kissuu-us-xyz-sila-kissuu-us-route.apps.ocp-na2.prod.nextcle.com
+			  exposed on router default (host apps.ocp-na2.prod.nextcle.com) 26 seconds ago
+Path:			<none>
+TLS Termination:	<none>
+Insecure Policy:	<none>
+Endpoint Port:		8080-tcp
+
+Service:	php-helloworld
+Weight:		100 (100%)
+Endpoints:	10.129.9.19:8443, 10.129.9.19:8080
+[student@workstation DO180-apps]$ curl ${RHT_OCP4_DEV_USER}-xyz-${RHT_OCP4_DEV_USER}-route.${RHT_OCP4_WILDCARD_DOMAIN}
+Hello, World! php version is 7.1.30
+[student@workstation DO180-apps]$ lab openshift-routes finish 
+
+Completing the Guided Exercise: Exposing a Service as a Route
+
+ · Removing OpenShift project 'sila-kissuu-us-route'...........  SUCCESS
+[student@workstation DO180-apps]$ vi running.log 
+[student@workstation DO180-apps]$ clear
+
+[student@workstation DO180-apps]$ lab openshift-s2i start 
+
+Setting up workstation for the Guided Excercise: Creating a Containerized Application with Source-to-Image
+
+ · Installing the tree command.................................  SUCCESS
+ Checking local clone of the applications repository:
+ · Folder '/home/student/DO180-apps' is a git repo.............  SUCCESS
+ · Git repo '/home/student/DO180-apps' has no pending changes..  FAIL
+
+You do not seem to have a local clone of the applications repository.
+Perform the first guided exercise: "Configuring Your Classroom Environment" before starting this exercise.
+
+Cannot continue due to the previous errors.....................  FAIL
+
+[student@workstation DO180-apps]$ ll
+total 140
+drwxrwxr-x. 2 student student     23 Aug  1 15:04 example
+drwxrwxr-x. 2 student student     43 Aug  1 15:04 nodejs-app
+drwxrwxr-x. 2 student student     40 Aug  1 15:04 nodejs-helloworld
+drwxrwxr-x. 2 student student     23 Aug  1 15:04 php-helloworld
+-rw-rw-r--. 1 student student     54 Aug  1 15:04 README.md
+-rw-rw-r--. 1 student student 137492 Aug  1 19:38 running.log
+drwxrwxr-x. 2 student student     23 Aug  1 15:04 temps
+drwxrwxr-x. 5 student student     51 Aug  1 15:04 todoapp
+[student@workstation DO180-apps]$ !79
+git commit -a -m "updates"
+[master 905681b] updates
+ 1 file changed, 227 insertions(+)
+[student@workstation DO180-apps]$ !80
+git push
+Counting objects: 5, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 4.04 KiB | 0 bytes/s, done.
+Total 3 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/kasovoni/DO180-apps
+   8c52cf9..905681b  master -> master
+[student@workstation DO180-apps]$ lab openshift-s2i start 
+
+Setting up workstation for the Guided Excercise: Creating a Containerized Application with Source-to-Image
+
+ · Installing the tree command.................................  SUCCESS
+ Checking local clone of the applications repository:
+ · Folder '/home/student/DO180-apps' is a git repo.............  SUCCESS
+ · Git repo '/home/student/DO180-apps' has no pending changes..  SUCCESS
+ Verifying the OpenShift cluster is running:
+ · Log in on OpenShift.........................................  SUCCESS
+ · Check the internal registry is up and running...............  SUCCESS
+ · Ensuring the 'sila-kissuu-us-s2i' project does not exist....  SUCCESS
+ · Downloading starter project.................................  SUCCESS
+ · Downloading solution project................................  SUCCESS
+
+Setup successful. Please proceed with the exercise.
+
+[student@workstation DO180-apps]$ cd ../DO180/labs/openshift-s2i/
+[student@workstation openshift-s2i]$ tree
+.
+└── s2i-php-container
+    ├── 5.6
+    │   ├── cccp.yml
+    │   ├── contrib
+    │   │   └── etc
+    │   │       ├── conf.d
+    │   │       │   ├── 00-documentroot.conf.template
+    │   │       │   └── 50-mpm-tuning.conf.template
+    │   │       ├── httpdconf.sed
+    │   │       ├── php.d
+    │   │       │   └── 10-opcache.ini.template
+    │   │       ├── php.ini.template
+    │   │       └── scl_enable
+    │   ├── Dockerfile
+    │   ├── Dockerfile.rhel7
+    │   ├── README.md
+    │   ├── s2i
+    │   │   └── bin
+    │   │       ├── assemble
+    │   │       ├── run
+    │   │       └── usage
+    │   └── test
+    │       ├── run
+    │       └── test-app
+    │           ├── composer.json
+    │           └── index.php
+    ├── hack
+    │   ├── build.sh
+    │   └── common.mk
+    ├── LICENSE
+    ├── Makefile
+    └── README.md
+
+11 directories, 21 files
+[student@workstation openshift-s2i]$ tree s2i-php-container/
+s2i-php-container/
+├── 5.6
+│   ├── cccp.yml
+│   ├── contrib
+│   │   └── etc
+│   │       ├── conf.d
+│   │       │   ├── 00-documentroot.conf.template
+│   │       │   └── 50-mpm-tuning.conf.template
+│   │       ├── httpdconf.sed
+│   │       ├── php.d
+│   │       │   └── 10-opcache.ini.template
+│   │       ├── php.ini.template
+│   │       └── scl_enable
+│   ├── Dockerfile
+│   ├── Dockerfile.rhel7
+│   ├── README.md
+│   ├── s2i
+│   │   └── bin
+│   │       ├── assemble
+│   │       ├── run
+│   │       └── usage
+│   └── test
+│       ├── run
+│       └── test-app
+│           ├── composer.json
+│           └── index.php
+├── hack
+│   ├── build.sh
+│   └── common.mk
+├── LICENSE
+├── Makefile
+└── README.md
+
+10 directories, 21 files
+[student@workstation openshift-s2i]$ cd -
+/home/student/DO180-apps
+[student@workstation DO180-apps]$ ls
+example  nodejs-app  nodejs-helloworld  php-helloworld  README.md  running.log  temps  todoapp
+[student@workstation DO180-apps]$ git checkout -b s2i
+Switched to a new branch 's2i'
+[student@workstation DO180-apps]$ git push -u origin s2i
+To https://github.com/kasovoni/DO180-apps
+ ! [rejected]        s2i -> s2i (non-fast-forward)
+error: failed to push some refs to 'https://github.com/kasovoni/DO180-apps'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+hint: before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[student@workstation DO180-apps]$ git pull
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/<branch> s2i
+
+[student@workstation DO180-apps]$ git checkout master
+Switched to branch 'master'
+[student@workstation DO180-apps]$ git checkout -b s2i
+fatal: A branch named 's2i' already exists.
+[student@workstation DO180-apps]$ git checkout s2i
+Switched to branch 's2i'
+[student@workstation DO180-apps]$ git push -u origin s2i
+To https://github.com/kasovoni/DO180-apps
+ ! [rejected]        s2i -> s2i (non-fast-forward)
+error: failed to push some refs to 'https://github.com/kasovoni/DO180-apps'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+hint: before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[student@workstation DO180-apps]$ git pull master
+fatal: 'master' does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[student@workstation DO180-apps]$ git checkout master
+Switched to branch 'master'
+[student@workstation DO180-apps]$ lab openshift-s2i finish 
+
+Completing the Guided Excercise: Creating a Containerized Application with Source-to-Image
+
+ · Log in on OpenShift.........................................  SUCCESS
+ · Deleting the 'sila-kissuu-us-s2i' project...................  SUCCESS
+[student@workstation DO180-apps]$ lab openshift-webconsole start 
+
+Setting up workstation for the Guided Exercise: Creating an Application with the Web Console
+
+ Verifying the OpenShift cluster is running:
+ · Log in on OpenShift.........................................  SUCCESS
+ · Check the internal registry is up and running...............  SUCCESS
+ · Ensuring the 'sila-kissuu-us-console' project does not exist  SUCCESS
+
+[student@workstation DO180-apps]$ git checkout -b console
+Switched to a new branch 'console'
+[student@workstation DO180-apps]$ git push -u origin console
+To https://github.com/kasovoni/DO180-apps
+ ! [rejected]        console -> console (non-fast-forward)
+error: failed to push some refs to 'https://github.com/kasovoni/DO180-apps'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+hint: before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[student@workstation DO180-apps]$ git pull
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/<branch> console
+
+[student@workstation DO180-apps]$ git checkout master
+Switched to branch 'master'
+[student@workstation DO180-apps]$ git pull
+Already up-to-date.
+[student@workstation DO180-apps]$ git checkout -b console
+fatal: A branch named 'console' already exists.
+[student@workstation DO180-apps]$ git checkout console
+Switched to branch 'console'
+[student@workstation DO180-apps]$ git push -u origin console
+To https://github.com/kasovoni/DO180-apps
+ ! [rejected]        console -> console (non-fast-forward)
+error: failed to push some refs to 'https://github.com/kasovoni/DO180-apps'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+hint: before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[student@workstation DO180-apps]$ git checkout master
+Switched to branch 'master'
+[student@workstation DO180-apps]$ lab openshift-webconsole finish 
+
+Completing the Guided Exercise: Creating an Application with the Web Console
+
+ · Ensure the 'sila-kissuu-us-console' project is deleted .....  SUCCESS
+
+[student@workstation DO180-apps]$ history |grep login
+  213  oc login -u ${RHT_OCP4_DEV_USER} -p {RHT_OCP4_DEV_PASSWORD} ${RHT_OCP4_MASTER_API}
+  214  oc login -u ${RHT_OCP4_DEV_USER} -p ${RHT_OCP4_DEV_PASSWORD} ${RHT_OCP4_MASTER_API}
+  285  history |grep login
+[student@workstation DO180-apps]$ !214
+oc login -u ${RHT_OCP4_DEV_USER} -p ${RHT_OCP4_DEV_PASSWORD} ${RHT_OCP4_MASTER_API}
+Login successful.
+
+You don't have any projects. You can try to create a new project, by running
+
+    oc new-project <projectname>
+
+[student@workstation DO180-apps]$ history |grep new
+  215  oc new-project ${RHT_OCP4_DEV_USER}-mysql-openshift
+  216  oc new-app --docker-image=registry.access.redhat.com/rhscl/mysql-57-rhel7:latest --name=mysql-openshift -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=testdb -e MYSQL_ROOT_PASSWORD=r00tpa55
+  235  oc new-project ${RHT_OCP4_DEV_USER}-route
+  236  oc new-app php:7.1~https://github.com/${RHT_OCP4_GITHUB_USER}/DO180-apps --context-dir php-helloworld --name php-helloworld
+  287  history |grep new
+[student@workstation DO180-apps]$ oc new-project ${RHT_OCP4_DEV_USER}-ocp
+Now using project "sila-kissuu-us-ocp" on server "https://api.ocp-na2.prod.nextcle.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app django-psql-example
+
+to build a new example application in Python. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+
+[student@workstation DO180-apps]$ oc new-app php:7.1~https://github.com/RedHatTraining/DO180-apps --context-dir temps --name temps
+--> Found image 8e01e80 (8 months old) in image stream "openshift/php" under tag "7.1" for "php:7.1"
+
+    Apache 2.4 with PHP 7.1 
+    ----------------------- 
+    PHP 7.1 available as container is a base platform for building and running various PHP 7.1 applications and frameworks. PHP is an HTML-embedded scripting language. PHP attempts to make it easy for developers to write dynamically generated web pages. PHP also offers built-in database integration for several commercial and non-commercial database management systems, so writing a database-enabled webpage with PHP is fairly simple. The most common use of PHP coding is probably as a replacement for CGI scripts.
+
+    Tags: builder, php, php71, rh-php71
+
+    * A source build using source code from https://github.com/RedHatTraining/DO180-apps will be created
+      * The resulting image will be pushed to image stream tag "temps:latest"
+      * Use 'oc start-build' to trigger a new build
+    * This image will be deployed in deployment config "temps"
+    * Ports 8080/tcp, 8443/tcp will be load balanced by service "temps"
+      * Other containers can access this service through the hostname "temps"
+
+--> Creating resources ...
+    imagestream.image.openshift.io "temps" created
+    buildconfig.build.openshift.io "temps" created
+    deploymentconfig.apps.openshift.io "temps" created
+    service "temps" created
+--> Success
+    Build scheduled, use 'oc logs -f bc/temps' to track its progress.
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose svc/temps' 
+    Run 'oc status' to view your app.
+[student@workstation DO180-apps]$ oc logs -f bc/temps
+Cloning "https://github.com/RedHatTraining/DO180-apps" ...
+	Commit:	f7cd8963ef353d9173c3a21dcccf402f3616840b (Initial commit, including all apps previously in course)
+	Author:	Jordi Sola <someth2say@gmail.com>
+	Date:	Fri Oct 4 13:04:03 2019 +0200
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:16df3eb2f02e0560f09ae997a937d135f747b970d5c2c9bf30b6de874827f3ba
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying config sha256:8e01e80b24124ddc69686179b836d01cb818bad93be2e59e13c3ab7b0ff16196
+Writing manifest to image destination
+Storing signatures
+Generating dockerfile with builder image image-registry.openshift-image-registry.svc:5000/openshift/php@sha256:289ef5852151a1a3ea4fdf2581a86a60ada0719e54a5ddd78f5252742e6d2b8d
+STEP 1: FROM image-registry.openshift-image-registry.svc:5000/openshift/php@sha256:289ef5852151a1a3ea4fdf2581a86a60ada0719e54a5ddd78f5252742e6d2b8d
+STEP 2: LABEL "io.openshift.build.image"="image-registry.openshift-image-registry.svc:5000/openshift/php@sha256:289ef5852151a1a3ea4fdf2581a86a60ada0719e54a5ddd78f5252742e6d2b8d" "io.openshift.build.commit.author"="Jordi Sola <someth2say@gmail.com>" "io.openshift.build.commit.date"="Fri Oct 4 13:04:03 2019 +0200" "io.openshift.build.commit.id"="f7cd8963ef353d9173c3a21dcccf402f3616840b" "io.openshift.build.commit.ref"="master" "io.openshift.build.commit.message"="Initial commit, including all apps previously in course" "io.openshift.build.source-location"="https://github.com/RedHatTraining/DO180-apps" "io.openshift.build.source-context-dir"="temps"
+STEP 3: ENV OPENSHIFT_BUILD_NAME="temps-1" OPENSHIFT_BUILD_NAMESPACE="sila-kissuu-us-ocp" OPENSHIFT_BUILD_SOURCE="https://github.com/RedHatTraining/DO180-apps" OPENSHIFT_BUILD_COMMIT="f7cd8963ef353d9173c3a21dcccf402f3616840b"
+STEP 4: USER root
+STEP 5: COPY upload/src /tmp/src
+STEP 6: RUN chown -R 1001:0 /tmp/src
+time="2020-08-01T19:50:58Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah181896240/mnt/rootfs\": error checking if \"/tmp/buildah181896240/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-01T19:50:58Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah181896240/mnt/rootfs\": error checking if \"/tmp/buildah181896240/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 7: USER 1001
+STEP 8: RUN /usr/libexec/s2i/assemble
+---> Installing application source...
+=> sourcing 20-copy-config.sh ...
+---> 19:50:59     Processing additional arbitrary httpd configuration provided by s2i ...
+=> sourcing 00-documentroot.conf ...
+=> sourcing 50-mpm-tuning.conf ...
+=> sourcing 40-ssl-certs.sh ...
+time="2020-08-01T19:51:00Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah599481629/mnt/rootfs\": error checking if \"/tmp/buildah599481629/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-01T19:51:00Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah599481629/mnt/rootfs\": error checking if \"/tmp/buildah599481629/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 9: CMD /usr/libexec/s2i/run
+STEP 10: COMMIT temp.builder.openshift.io/sila-kissuu-us-ocp/temps-1:c74b06e4
+Getting image source signatures
+Copying blob sha256:a551fb857b61df88ae64cded378611456294ee7143bc068eb3a9ee1a29934658
+Copying blob sha256:08c4aa164cbaadfb32414e39d9b252a5382b9db1dd8e028fb11805074edbe608
+Copying blob sha256:7c6c57a17fb3de2b83515a0e33782d6d769fa90725da4eb75311e5ffbf601e49
+Copying blob sha256:c3b514cae9b11a6aadc78fdbb3d7b71226759927a8149f97ea400628744ad2c9
+Copying blob sha256:67ce50f5984a7a2ae8efd16c0dd2780e95982256be555d4e9a272357783ec338
+Copying blob sha256:0eade84ff7ab392d99beb1b6412f6f08b67df921611106151920281d660bd02c
+Copying config sha256:9ab464da6e7cd61400b7572f75ba9dda729d78dc6c4c7334d24709f6ffcf33c4
+Writing manifest to image destination
+Storing signatures
+9ab464da6e7cd61400b7572f75ba9dda729d78dc6c4c7334d24709f6ffcf33c4
+
+Pushing image image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-ocp/temps:latest ...
+Getting image source signatures
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:0eade84ff7ab392d99beb1b6412f6f08b67df921611106151920281d660bd02c
+Copying blob sha256:16df3eb2f02e0560f09ae997a937d135f747b970d5c2c9bf30b6de874827f3ba
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying config sha256:9ab464da6e7cd61400b7572f75ba9dda729d78dc6c4c7334d24709f6ffcf33c4
+Writing manifest to image destination
+Storing signatures
+Successfully pushed image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-ocp/temps@sha256:3b5a16fa7f3560cf12b58281e6a4585f045913395df61bac8c86ecced1e389f1
+Push successful
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc get pods -w
+NAME             READY   STATUS              RESTARTS   AGE
+temps-1-6gstp    0/1     Pending             0          0s
+temps-1-build    0/1     Completed           0          91s
+temps-1-deploy   0/1     ContainerCreating   0          9s
+temps-1-6gstp   0/1   ContainerCreating   0     0s
+temps-1-deploy   1/1   Running   0     10s
+temps-1-6gstp   0/1   ContainerCreating   0     8s
+temps-1-6gstp   1/1   Running   0     12s
+temps-1-deploy   0/1   Completed   0     22s
+temps-1-deploy   0/1   Completed   0     22s
+^C[student@workstation DO180-apps]$ oc get pods -w
+NAME             READY   STATUS      RESTARTS   AGE
+temps-1-6gstp    1/1     Running     0          33s
+temps-1-build    0/1     Completed   0          2m4s
+temps-1-deploy   0/1     Completed   0          42s
+^C[student@workstation DO180-apps]$ oc expose svc/temps
+route.route.openshift.io/temps exposed
+[student@workstation DO180-apps]$ oc get route/temps
+NAME    HOST/PORT                                                PATH   SERVICES   PORT       TERMINATION   WILDCARD
+temps   temps-sila-kissuu-us-ocp.apps.ocp-na2.prod.nextcle.com          temps      8080-tcp                 None
+[student@workstation DO180-apps]$ lab openshift-review finish 
+
+Completing the Lab: Deploying Containerized Applications on OpenShift
+
+ · Log in on OpenShift.........................................  SUCCESS
+ · Deleting the sila-kissuu-us-ocp project.....................  SUCCESS
+[student@workstation DO180-apps]$ 
 

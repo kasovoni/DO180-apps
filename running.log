@@ -444,3 +444,157 @@ Completing the Guided Exercise: Persisting a MySQL Database
  · Removing the fcontext for /var/local/mysql..................  SUCCESS
 [student@workstation ~]$ 
 
+
+[student@workstation ~]$ lab manage-networking start
+
+Setting up workstation for the Guided Exercise: Loading the Database
+
+ · Checking podman configuration...............................  SUCCESS
+ · Creating a host directory for the database container:
+   · Adding fcontext policy for /var/local/mysql...............  SUCCESS
+   · Creating the /var/local/mysql directory...................  SUCCESS
+   · Apply fcontext policy to /var/local/mysql.................  SUCCESS
+ · Downloading starter project.................................  SUCCESS
+ · Downloading solution project................................  SUCCESS
+
+Setup successful. Please proceed with the exercise.
+
+
+[student@workstation ~]$ sudo podman run --name mysqldb-port -d -v /var/local/mysql:/var/lib/mysql -p 13306:3306 -e -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7
+option --env requires a value
+[student@workstation ~]$ sudo podman run --name mysqldb-port -d -v /var/local/mysql:/var/lib/mysql -p 13306:3306 -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 rhscl/mysql-57-rhel7
+Trying to pull registry.access.redhat.com/rhscl/mysql-57-rhel7:latest...Getting image source signatures
+Copying blob sha256:1c9f515fc6ab2b7ebfcaffd8af681b68869d78a3b19c69e87c296363ab1bc2fe
+ 72.70 MB / ? [=-----------------------------------------------------------] 4s 
+Copying blob sha256:1d2c4ce43b78cb9a97ede7f19ad1406a43ee50532568bda660193e4a404b424f
+ 1.54 KB / ? [--------------------------------------=----------------------] 0s 
+Copying blob sha256:f1e961fe4c5192ab9f8e241a2efc674779623ac6a3ed49ee9a1a5b3b8425fe0d
+ 6.85 MB / ? [-----------------------=-------------------------------------] 0s 
+Copying blob sha256:9f1840c3b3bd1303763f9abba51fdd1dcce1ed28bfff318dd2af055b78207520
+ 62.31 MB / ? [-------------------=----------------------------------------] 3s 
+Copying config sha256:60726b33a00a2c3be60e25c3270a34a9b147db86602f05a71988a1c92a70cebc
+ 6.85 KB / 6.85 KB [========================================================] 0s
+Writing manifest to image destination
+Storing signatures
+d72c3a0518821a9c306fa063d5f4ece4730b99956b142eb2381d768d527b6e5e
+[student@workstation ~]$ 
+[student@workstation ~]$ 
+[student@workstation ~]$ sudo podman ps -a
+CONTAINER ID   IMAGE                                                    COMMAND                  CREATED          STATUS              PORTS                     NAMES          IS INFRA
+d72c3a051882   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   28 seconds ago   Up 28 seconds ago   0.0.0.0:13306->3306/tcp   mysqldb-port   false
+[student@workstation ~]$ sudo podman ps 
+CONTAINER ID   IMAGE                                                    COMMAND                  CREATED          STATUS              PORTS                     NAMES
+d72c3a051882   registry.access.redhat.com/rhscl/mysql-57-rhel7:latest   container-entrypoin...   42 seconds ago   Up 42 seconds ago   0.0.0.0:13306->3306/tcp   mysqldb-port
+[student@workstation ~]$ 
+[student@workstation ~]$ 
+[student@workstation ~]$ mysql -uuser1 -h 127.0.0.1 -pmypa55 -P13306 items < /home/student/DO180/labs/manage-networking/db.sql 
+[student@workstation ~]$ ls
+-d       DO180       Documents  -e     Pictures  running.log  Videos
+Desktop  DO180-apps  Downloads  Music  Public    Templates
+[student@workstation ~]$ cd DO180
+[student@workstation DO180]$ ls
+labs  solutions
+[student@workstation DO180]$ cd labs/
+[student@workstation labs]$ ll
+total 0
+drwxrwxr-x. 2 student student 39 Sep 24  2019 container-review
+drwxrwxr-x. 2 student student 20 Sep 24  2019 manage-lifecycle
+drwxrwxr-x. 2 student student 20 Sep 24  2019 manage-networking
+[student@workstation labs]$ cd manage-networking/
+[student@workstation manage-networking]$ ll
+total 4
+-rw-rw-r--. 1 student student 271 Sep 24  2019 db.sql
+[student@workstation manage-networking]$ cd ~
+[student@workstation ~]$ ll
+total 24
+-rw-rw-r--. 1 student student     0 Aug  1 15:05 -d
+drwxr-xr-x. 2 student student    40 Aug  1 14:55 Desktop
+drwxr-xr-x. 4 root    root       35 Aug  1 15:10 DO180
+drwxrwxr-x. 9 student student   143 Aug  1 15:04 DO180-apps
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Documents
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Downloads
+-rw-rw-r--. 1 student student     0 Aug  1 15:05 -e
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Music
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Pictures
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Public
+-rw-rw-r--. 1 student student 21225 Aug  1 15:38 running.log
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Templates
+drwxr-xr-x. 2 student student     6 Aug  1 14:52 Videos
+[student@workstation ~]$ cd DO180-apps/
+[student@workstation DO180-apps]$ ls
+example  nodejs-app  nodejs-helloworld  php-helloworld  README.md  temps  todoapp
+[student@workstation DO180-apps]$ mv ~/running.log .
+[student@workstation DO180-apps]$ git push
+Username for 'https://github.com': kasovoni
+Password for 'https://kasovoni@github.com': 
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/kasovoni/DO180-apps/'
+[student@workstation DO180-apps]$ git push
+Username for 'https://github.com': kasovoni
+Password for 'https://kasovoni@github.com': 
+Everything up-to-date
+[student@workstation DO180-apps]$ git commit
+# On branch master
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	running.log
+nothing added to commit but untracked files present (use "git add" to track)
+[student@workstation DO180-apps]$ git add running.log
+[student@workstation DO180-apps]$ git commit
+[master ca6a057] add running log
+ 1 file changed, 446 insertions(+)
+ create mode 100644 running.log
+[student@workstation DO180-apps]$ git push
+Counting objects: 4, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 5.31 KiB | 0 bytes/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/kasovoni/DO180-apps
+   f7cd896..ca6a057  master -> master
+[student@workstation DO180-apps]$ mysql -uuser1 -h 127.0.0.1 -pmypa55 -P13306 items -e "select * from item"
+ERROR 1146 (42S02) at line 1: Table 'items.item' doesn't exist
+[student@workstation DO180-apps]$ mysql -uuser1 -h 127.0.0.1 -pmypa55 -P13306 items -e "select * from Item"
++----+-------------------+------+
+| id | description       | done |
++----+-------------------+------+
+|  1 | Pick up newspaper |    0 |
+|  2 | Buy groceries     |    1 |
++----+-------------------+------+
+[student@workstation DO180-apps]$ sudo podman exec -it mysqldb-port /bin/bash
+bash-4.2$ which mysql
+/opt/rh/rh-mysql57/root/usr/bin/mysql
+bash-4.2$ mysql -uroot items -e "select * from Item"
++----+-------------------+------+
+| id | description       | done |
++----+-------------------+------+
+|  1 | Pick up newspaper |    0 |
+|  2 | Buy groceries     |    1 |
++----+-------------------+------+
+bash-4.2$ exit
+exit
+[student@workstation DO180-apps]$ ls
+example  nodejs-app  nodejs-helloworld  php-helloworld  README.md  running.log  temps  todoapp
+[student@workstation DO180-apps]$ sudo podman exec -it mysqldb-port /opt/rh/rh-^C
+[student@workstation DO180-apps]$ ls /opt
+apache-maven  apache-maven-3.5.4  rh
+[student@workstation DO180-apps]$ sudo podman exec -it mysqldb-port /opt/rh/rh-mysql57/root/usr/bin/mysql -uroot items -e "select * from Item"
++----+-------------------+------+
+| id | description       | done |
++----+-------------------+------+
+|  1 | Pick up newspaper |    0 |
+|  2 | Buy groceries     |    1 |
++----+-------------------+------+
+[student@workstation DO180-apps]$ lab manage-networking finish
+
+Completing the Guided Exercise: Loading the Database
+
+ · Stopping the 'mysqldb-port' container.......................  SUCCESS
+ · Removing the 'mysqldb-port' container.......................  SUCCESS
+ · Removing the 'rhscl/mysql-57-rhel7' image...................  SUCCESS
+ · Removing the /var/local/mysql directory.....................  SUCCESS
+ · Removing the fcontext for /var/local/mysql..................  SUCCESS
+[student@workstation DO180-apps]$ 
+

@@ -2860,3 +2860,659 @@ Completing the Lab: Deploying Containerized Applications on OpenShift
  · Deleting the sila-kissuu-us-ocp project.....................  SUCCESS
 [student@workstation DO180-apps]$ 
 
+
+
+=============================
+
+Writing objects: 100% (3/3), 2.97 KiB | 0 bytes/s, done.
+Total 3 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/kasovoni/DO180-apps
+   76c18aa..cfd30c9  troubleshoot-s2i -> troubleshoot-s2i
+[student@workstation DO180-apps]$ lab troubleshoot-review start 
+
+Checking prerequisites for Lab: Troubleshooting Containerized Applications
+
+ Checking local clone of the applications repository:
+ · Folder '/home/student/DO180-apps' is a git repo.............  SUCCESS
+ · Git repo '/home/student/DO180-apps' has no pending changes..  SUCCESS
+ · Project 'nodejs-app' exists in student's GitHub fork........  SUCCESS
+ Checking for conflicts with existing OpenShift projects:
+ · Project 'sila-kissuu-us-nodejs-app' is absent...............  SUCCESS
+ Checking for conflicts with existing local containers:
+ · Container 'test' is absent..................................  SUCCESS
+ Verifying the OpenShift cluster is running:
+ · Log in on OpenShift.........................................  SUCCESS
+ · Check the internal registry is up and running...............  SUCCESS
+
+Setting up the classroom for Lab: Troubleshooting Containerized Applications
+
+ · Downloading starter project.................................  SUCCESS
+ · Downloading solution project................................  SUCCESS
+
+Setup successful. Please proceed with the exercise.
+
+
+Overall start status...........................................  SUCCESS
+
+[student@workstation DO180-apps]$ clear
+
+[student@workstation DO180-apps]$ history |grep sourc
+  210  lab openshift-resources start 
+  211  source /usr/local/etc/ocp4.config 
+  227  lab openshift-resources finish 
+  233  source /usr/local/etc/ocp4.config 
+  301  history |grep source
+  302  source /usr/local/etc/ocp4.config 
+  361  source /usr/local/etc/ocp4.config 
+  406  history |grep sourc
+[student@workstation DO180-apps]$ !361
+source /usr/local/etc/ocp4.config 
+[student@workstation DO180-apps]$ git checkout master
+Switched to branch 'master'
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ git checkout -b troubleshoot-review
+Switched to a new branch 'troubleshoot-review'
+[student@workstation DO180-apps]$ git push -u origin troubleshoot-review
+Total 0 (delta 0), reused 0 (delta 0)
+remote: 
+remote: Create a pull request for 'troubleshoot-review' on GitHub by visiting:
+remote:      https://github.com/kasovoni/DO180-apps/pull/new/troubleshoot-review
+remote: 
+To https://github.com/kasovoni/DO180-apps
+ * [new branch]      troubleshoot-review -> troubleshoot-review
+Branch troubleshoot-review set up to track remote branch troubleshoot-review from origin.
+[student@workstation DO180-apps]$ ll
+total 160
+drwxrwxr-x. 2 student student     23 Aug  1 15:04 example
+drwxrwxr-x. 2 student student     43 Aug  1 15:04 nodejs-app
+drwxrwxr-x. 2 student student     40 Aug  5 17:56 nodejs-helloworld
+drwxrwxr-x. 2 student student     23 Aug  1 15:04 php-helloworld
+-rw-rw-r--. 1 student student     54 Aug  1 15:04 README.md
+-rw-rw-r--. 1 student student 159134 Aug  5 17:56 running.log
+drwxrwxr-x. 2 student student     23 Aug  1 15:04 temps
+drwxrwxr-x. 5 student student     51 Aug  1 15:04 todoapp
+[student@workstation DO180-apps]$ oc login -u "${RHT_OCP4_DEV_USER}"  -p "${RHT_OCP4_DEV_PASSWORD}" "${RHT_OCP4_MASTER_API}"
+Login successful.
+
+You don't have any projects. You can try to create a new project, by running
+
+    oc new-project <projectname>
+
+[student@workstation DO180-apps]$ oc new-project ${RHT_OCP4_DEV_USER}-nodejs-app
+Now using project "sila-kissuu-us-nodejs-app" on server "https://api.ocp-na2.prod.nextcle.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app django-psql-example
+
+to build a new example application in Python. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+
+[student@workstation DO180-apps]$ ls
+example  nodejs-app  nodejs-helloworld  php-helloworld  README.md  running.log  temps  todoapp
+[student@workstation DO180-apps]$ oc new-app --context-dir=nodejs-app https://github.com/${RHT_OCP4_GITHUB_USER}/DO180-apps#troubleshoot-review -i nodejs:8 --name nodejs-dev --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/npm-proxy  
+--> Found image 65d8e33 (8 months old) in image stream "openshift/nodejs" under tag "8" for "nodejs:8"
+
+    Node.js 8 
+    --------- 
+    Node.js 8 available as container is a base platform for building and running various Node.js 8 applications and frameworks. Node.js is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
+
+    Tags: builder, nodejs, nodejs8
+
+    * The source repository appears to match: nodejs
+    * A source build using source code from https://github.com/kasovoni/DO180-apps#troubleshoot-review will be created
+      * The resulting image will be pushed to image stream tag "nodejs-dev:latest"
+      * Use 'oc start-build' to trigger a new build
+    * This image will be deployed in deployment config "nodejs-dev"
+    * Port 8080/tcp will be load balanced by service "nodejs-dev"
+      * Other containers can access this service through the hostname "nodejs-dev"
+
+--> Creating resources ...
+    imagestream.image.openshift.io "nodejs-dev" created
+    buildconfig.build.openshift.io "nodejs-dev" created
+    deploymentconfig.apps.openshift.io "nodejs-dev" created
+    service "nodejs-dev" created
+--> Success
+    Build scheduled, use 'oc logs -f bc/nodejs-dev' to track its progress.
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose svc/nodejs-dev' 
+    Run 'oc status' to view your app.
+[student@workstation DO180-apps]$ oc logs -f bc/nodejs-dev
+Cloning "https://github.com/kasovoni/DO180-apps" ...
+	Commit:	74de52ff8466cdeeb9961661507e4bc3012c0069 (updates)
+	Author:	Student User <student@workstation.lab.example.com>
+	Date:	Mon Aug 3 17:29:08 2020 +0000
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:f31f544bb80de4b38c70506516c91d18e7de1c6988143ebe000b49159e5b1f14
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying config sha256:65d8e33f8671dc979c8a6330082a9a3f8b79bb7bda223aade2bfdbbc584ec51c
+Writing manifest to image destination
+Storing signatures
+Generating dockerfile with builder image image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9
+STEP 1: FROM image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9
+STEP 2: LABEL "io.openshift.build.commit.ref"="troubleshoot-review" "io.openshift.build.commit.message"="updates" "io.openshift.build.source-location"="https://github.com/kasovoni/DO180-apps" "io.openshift.build.source-context-dir"="nodejs-app" "io.openshift.build.image"="image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9" "io.openshift.build.commit.author"="Student User <student@workstation.lab.example.com>" "io.openshift.build.commit.date"="Mon Aug 3 17:29:08 2020 +0000" "io.openshift.build.commit.id"="74de52ff8466cdeeb9961661507e4bc3012c0069"
+STEP 3: ENV OPENSHIFT_BUILD_NAME="nodejs-dev-1" OPENSHIFT_BUILD_NAMESPACE="sila-kissuu-us-nodejs-app" OPENSHIFT_BUILD_SOURCE="https://github.com/kasovoni/DO180-apps" OPENSHIFT_BUILD_REFERENCE="troubleshoot-review" OPENSHIFT_BUILD_COMMIT="74de52ff8466cdeeb9961661507e4bc3012c0069" npm_config_registry="http://nexus-common.apps.ocp-na2.prod.nextcle.com/repository/npm-proxy"
+STEP 4: USER root
+STEP 5: COPY upload/src /tmp/src
+STEP 6: RUN chown -R 1001:0 /tmp/src
+time="2020-08-05T18:07:35Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah893969951/mnt/rootfs\": error checking if \"/tmp/buildah893969951/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-05T18:07:36Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah893969951/mnt/rootfs\": error checking if \"/tmp/buildah893969951/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 7: USER 1001
+STEP 8: RUN /usr/libexec/s2i/assemble
+---> Installing application source ...
+---> Installing all dependencies
+npm ERR! code ETARGET
+npm ERR! notarget No matching version found for express@4.20
+npm ERR! notarget In most cases you or one of your dependencies are requesting
+npm ERR! notarget a package version that doesn't exist.
+npm ERR! notarget 
+npm ERR! notarget It was specified as a dependency of 'nodejs-app'
+npm ERR! notarget 
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /opt/app-root/src/.npm/_logs/2020-08-05T18_07_38_972Z-debug.log
+subprocess exited with status 1
+subprocess exited with status 1
+error: build error: error building at STEP "RUN /usr/libexec/s2i/assemble": exit status 1
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ oc get pods
+NAME                 READY   STATUS   RESTARTS   AGE
+nodejs-dev-1-build   0/1     Error    0          92s
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ 
+[student@workstation DO180-apps]$ cd nodejs-app/
+[student@workstation nodejs-app]$ ls 
+package.json  server.js     
+[student@workstation nodejs-app]$ ls package.json 
+package.json
+[student@workstation nodejs-app]$ less package.json 
+[student@workstation nodejs-app]$ sed -i s/4.20/4.x/ package.json 
+[student@workstation nodejs-app]$ less package.json 
+[student@workstation nodejs-app]$ git commit -am "Fixed Express release"
+[troubleshoot-review 40c3eb2] Fixed Express release
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[student@workstation nodejs-app]$ git push
+Counting objects: 7, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 395 bytes | 0 bytes/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/kasovoni/DO180-apps
+   74de52f..40c3eb2  troubleshoot-review -> troubleshoot-review
+[student@workstation nodejs-app]$ oc start-build bc/nodejs-dev
+build.build.openshift.io/nodejs-dev-2 started
+[student@workstation nodejs-app]$ 
+[student@workstation nodejs-app]$ oc logs -f bc/nodejs-dev
+Cloning "https://github.com/kasovoni/DO180-apps" ...
+	Commit:	40c3eb2e1efda2d7955748affdb199031c7dee40 (Fixed Express release)
+	Author:	Student User <student@workstation.lab.example.com>
+	Date:	Wed Aug 5 18:10:14 2020 +0000
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:f31f544bb80de4b38c70506516c91d18e7de1c6988143ebe000b49159e5b1f14
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying config sha256:65d8e33f8671dc979c8a6330082a9a3f8b79bb7bda223aade2bfdbbc584ec51c
+Writing manifest to image destination
+Storing signatures
+Generating dockerfile with builder image image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9
+STEP 1: FROM image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9
+STEP 2: LABEL "io.openshift.build.commit.id"="40c3eb2e1efda2d7955748affdb199031c7dee40" "io.openshift.build.commit.ref"="troubleshoot-review" "io.openshift.build.commit.message"="Fixed Express release" "io.openshift.build.source-location"="https://github.com/kasovoni/DO180-apps" "io.openshift.build.source-context-dir"="nodejs-app" "io.openshift.build.image"="image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9" "io.openshift.build.commit.author"="Student User <student@workstation.lab.example.com>" "io.openshift.build.commit.date"="Wed Aug 5 18:10:14 2020 +0000"
+STEP 3: ENV OPENSHIFT_BUILD_NAME="nodejs-dev-2" OPENSHIFT_BUILD_NAMESPACE="sila-kissuu-us-nodejs-app" OPENSHIFT_BUILD_SOURCE="https://github.com/kasovoni/DO180-apps" OPENSHIFT_BUILD_REFERENCE="troubleshoot-review" OPENSHIFT_BUILD_COMMIT="40c3eb2e1efda2d7955748affdb199031c7dee40" npm_config_registry="http://nexus-common.apps.ocp-na2.prod.nextcle.com/repository/npm-proxy"
+STEP 4: USER root
+STEP 5: COPY upload/src /tmp/src
+STEP 6: RUN chown -R 1001:0 /tmp/src
+time="2020-08-05T18:12:01Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah587144779/mnt/rootfs\": error checking if \"/tmp/buildah587144779/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-05T18:12:01Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah587144779/mnt/rootfs\": error checking if \"/tmp/buildah587144779/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 7: USER 1001
+STEP 8: RUN /usr/libexec/s2i/assemble
+---> Installing application source ...
+---> Installing all dependencies
+npm notice created a lockfile as package-lock.json. You should commit this file.
+npm WARN nodejs-app@1.0.0 No repository field.
+npm WARN nodejs-app@1.0.0 license should be a valid SPDX license expression
+
+added 51 packages from 38 contributors in 3.45s
+---> Building in production mode
+---> Pruning the development dependencies
+npm WARN nodejs-app@1.0.0 No repository field.
+npm WARN nodejs-app@1.0.0 license should be a valid SPDX license expression
+
+up to date in 0.828s
+/opt/app-root/src/.npm is not a mountpoint
+---> Cleaning the npm cache /opt/app-root/src/.npm
+/tmp is not a mountpoint
+---> Cleaning the /tmp/npm-*
+time="2020-08-05T18:12:10Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah014993092/mnt/rootfs\": error checking if \"/tmp/buildah014993092/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-05T18:12:10Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah014993092/mnt/rootfs\": error checking if \"/tmp/buildah014993092/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 9: CMD /usr/libexec/s2i/run
+STEP 10: COMMIT temp.builder.openshift.io/sila-kissuu-us-nodejs-app/nodejs-dev-2:7066ab1c
+Getting image source signatures
+Copying blob sha256:a551fb857b61df88ae64cded378611456294ee7143bc068eb3a9ee1a29934658
+Copying blob sha256:08c4aa164cbaadfb32414e39d9b252a5382b9db1dd8e028fb11805074edbe608
+Copying blob sha256:7c6c57a17fb3de2b83515a0e33782d6d769fa90725da4eb75311e5ffbf601e49
+Copying blob sha256:c3b514cae9b11a6aadc78fdbb3d7b71226759927a8149f97ea400628744ad2c9
+Copying blob sha256:cbf37c90f9eeadb5d2e74836f652c53879efffd5eb8fb1c7d2b6bb2680aa2739
+Copying blob sha256:cb61de76c1e98818ec280c3c7e2d7fc35e1aca4afe743ecb7cd2e92e4022b7b0
+Copying config sha256:f01d7b7947669048c5cd55d33290c6f57b4f897c105ecd2e2e657c36cb5aa88e
+Writing manifest to image destination
+Storing signatures
+f01d7b7947669048c5cd55d33290c6f57b4f897c105ecd2e2e657c36cb5aa88e
+
+Pushing image image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-nodejs-app/nodejs-dev:latest ...
+Getting image source signatures
+Copying blob sha256:cb61de76c1e98818ec280c3c7e2d7fc35e1aca4afe743ecb7cd2e92e4022b7b0
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:f31f544bb80de4b38c70506516c91d18e7de1c6988143ebe000b49159e5b1f14
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying config sha256:f01d7b7947669048c5cd55d33290c6f57b4f897c105ecd2e2e657c36cb5aa88e
+Writing manifest to image destination
+Storing signatures
+Successfully pushed image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-nodejs-app/nodejs-dev@sha256:9317d2c9064a1065f19dfee8756892da20d52ab3cef9e6aa52812a42886f8c90
+Push successful
+[student@workstation nodejs-app]$ 
+[student@workstation nodejs-app]$ 
+[student@workstation nodejs-app]$ 
+[student@workstation nodejs-app]$ oc start-build bc/nodejs-dev
+build.build.openshift.io/nodejs-dev-3 started
+[student@workstation nodejs-app]$ oc logs -f bc/nodejs-dev
+Cloning "https://github.com/kasovoni/DO180-apps" ...
+	Commit:	40c3eb2e1efda2d7955748affdb199031c7dee40 (Fixed Express release)
+	Author:	Student User <student@workstation.lab.example.com>
+	Date:	Wed Aug 5 18:10:14 2020 +0000
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:f31f544bb80de4b38c70506516c91d18e7de1c6988143ebe000b49159e5b1f14
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+^C
+[student@workstation nodejs-app]$ oc get pods
+NAME                  READY   STATUS             RESTARTS   AGE
+nodejs-dev-1-build    0/1     Error              0          6m52s
+nodejs-dev-1-deploy   0/1     Completed          0          64s
+nodejs-dev-1-s67vb    0/1     CrashLoopBackOff   2          54s
+nodejs-dev-2-build    0/1     Completed          0          2m27s
+nodejs-dev-3-build    1/1     Running            0          45s
+[student@workstation nodejs-app]$ oc logs -f dc/nodejs-dev
+Environment: 
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.4.1
+npm info using node@v8.16.1
+npm info lifecycle nodejs-app@1.0.0~prestart: nodejs-app@1.0.0
+npm info lifecycle nodejs-app@1.0.0~start: nodejs-app@1.0.0
+
+> nodejs-app@1.0.0 start /opt/app-root/src
+> node server.js
+
+module.js:550
+    throw err;
+    ^
+
+Error: Cannot find module 'http-error'
+    at Function.Module._resolveFilename (module.js:548:15)
+    at Function.Module._load (module.js:475:25)
+    at Module.require (module.js:597:17)
+    at require (internal/module.js:11:18)
+    at Object.<anonymous> (/opt/app-root/src/server.js:1:81)
+    at Module._compile (module.js:653:30)
+    at Object.Module._extensions..js (module.js:664:10)
+    at Module.load (module.js:566:32)
+    at tryModuleLoad (module.js:506:12)
+    at Function.Module._load (module.js:498:3)
+npm info lifecycle nodejs-app@1.0.0~start: Failed to exec start script
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! nodejs-app@1.0.0 start: `node server.js`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the nodejs-app@1.0.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm timing npm Completed in 235ms
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /opt/app-root/src/.npm/_logs/2020-08-05T18_13_19_804Z-debug.log
+[student@workstation nodejs-app]$ sed -i s /http-error/html-errors/ server.js 
+sed: -e expression #1, char 1: unterminated `s' command
+[student@workstation nodejs-app]$ sed -i s/http-error/html-errors/ server.js 
+[student@workstation nodejs-app]$ git commit -am "Fixed module typo"
+[troubleshoot-review 29107b3] Fixed module typo
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[student@workstation nodejs-app]$ git push
+Counting objects: 7, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 404 bytes | 0 bytes/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/kasovoni/DO180-apps
+   40c3eb2..29107b3  troubleshoot-review -> troubleshoot-review
+[student@workstation nodejs-app]$ oc start-build bc/nodejs-dev
+build.build.openshift.io/nodejs-dev-4 started
+[student@workstation nodejs-app]$ oc logs -f dc/nodejs-dev
+Environment: 
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.4.1
+npm info using node@v8.16.1
+npm info lifecycle nodejs-app@1.0.0~prestart: nodejs-app@1.0.0
+npm info lifecycle nodejs-app@1.0.0~start: nodejs-app@1.0.0
+
+> nodejs-app@1.0.0 start /opt/app-root/src
+> node server.js
+
+module.js:550
+    throw err;
+    ^
+
+Error: Cannot find module 'http-error'
+    at Function.Module._resolveFilename (module.js:548:15)
+    at Function.Module._load (module.js:475:25)
+    at Module.require (module.js:597:17)
+    at require (internal/module.js:11:18)
+    at Object.<anonymous> (/opt/app-root/src/server.js:1:81)
+    at Module._compile (module.js:653:30)
+    at Object.Module._extensions..js (module.js:664:10)
+    at Module.load (module.js:566:32)
+    at tryModuleLoad (module.js:506:12)
+    at Function.Module._load (module.js:498:3)
+npm info lifecycle nodejs-app@1.0.0~start: Failed to exec start script
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! nodejs-app@1.0.0 start: `node server.js`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the nodejs-app@1.0.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm timing npm Completed in 316ms
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /opt/app-root/src/.npm/_logs/2020-08-05T18_25_01_868Z-debug.log
+[student@workstation nodejs-app]$ sed -i s/http-error/htp-errors/ server.js 
+[student@workstation nodejs-app]$ oc start-build bc/nodejs-dev
+build.build.openshift.io/nodejs-dev-5 started
+[student@workstation nodejs-app]$ oc logs -f dc/nodejs-dev
+Environment: 
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.4.1
+npm info using node@v8.16.1
+npm info lifecycle nodejs-app@1.0.0~prestart: nodejs-app@1.0.0
+npm info lifecycle nodejs-app@1.0.0~start: nodejs-app@1.0.0
+
+> nodejs-app@1.0.0 start /opt/app-root/src
+> node server.js
+
+module.js:550
+    throw err;
+    ^
+
+Error: Cannot find module 'http-error'
+    at Function.Module._resolveFilename (module.js:548:15)
+    at Function.Module._load (module.js:475:25)
+    at Module.require (module.js:597:17)
+    at require (internal/module.js:11:18)
+    at Object.<anonymous> (/opt/app-root/src/server.js:1:81)
+    at Module._compile (module.js:653:30)
+    at Object.Module._extensions..js (module.js:664:10)
+    at Module.load (module.js:566:32)
+    at tryModuleLoad (module.js:506:12)
+    at Function.Module._load (module.js:498:3)
+npm info lifecycle nodejs-app@1.0.0~start: Failed to exec start script
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! nodejs-app@1.0.0 start: `node server.js`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the nodejs-app@1.0.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm timing npm Completed in 316ms
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /opt/app-root/src/.npm/_logs/2020-08-05T18_25_01_868Z-debug.log
+[student@workstation nodejs-app]$ sed -i s/http-error/http-errors/ server.js 
+[student@workstation nodejs-app]$ oc start-build bc/nodejs-dev
+build.build.openshift.io/nodejs-dev-6 started
+[student@workstation nodejs-app]$ oc logs -f dc/nodejs-dev
+Environment: 
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.4.1
+npm info using node@v8.16.1
+npm info lifecycle nodejs-app@1.0.0~prestart: nodejs-app@1.0.0
+npm info lifecycle nodejs-app@1.0.0~start: nodejs-app@1.0.0
+
+> nodejs-app@1.0.0 start /opt/app-root/src
+> node server.js
+
+Example app listening on port 8080!
+npm info lifecycle nodejs-app@1.0.0~poststart: nodejs-app@1.0.0
+npm timing npm Completed in 90915ms
+npm info ok 
+[student@workstation nodejs-app]$ oc get pods -w
+NAME                  READY   STATUS      RESTARTS   AGE
+nodejs-dev-1-build    0/1     Error       0          23m
+nodejs-dev-1-deploy   0/1     Completed   0          18m
+nodejs-dev-2-build    0/1     Completed   0          19m
+nodejs-dev-2-deploy   0/1     Completed   0          16m
+nodejs-dev-3-build    0/1     Completed   0          17m
+nodejs-dev-3-deploy   0/1     Completed   0          2m41s
+nodejs-dev-4-build    0/1     Completed   0          4m14s
+nodejs-dev-4-deploy   0/1     Completed   0          71s
+nodejs-dev-4-jnfm7    1/1     Running     0          60s
+nodejs-dev-5-build    0/1     Completed   0          2m41s
+nodejs-dev-6-build    1/1     Running     0          71s
+^C[student@workstation nodejs-app]$ 
+[student@workstation nodejs-app]$ 
+[student@workstation nodejs-app]$ oc expose svc nodejs-dev
+route.route.openshift.io/nodejs-dev exposed
+[student@workstation nodejs-app]$ oc get route
+NAME         HOST/PORT                                                            PATH   SERVICES     PORT       TERMINATION   WILDCARD
+nodejs-dev   nodejs-dev-sila-kissuu-us-nodejs-app.apps.ocp-na2.prod.nextcle.com          nodejs-dev   8080-tcp                 None
+[student@workstation nodejs-app]$ curl nodejs-dev-${RHT_OCP4_DEV_USER}-nodejs-app.${RHT_OCP4_WILDCARD_DOMAIN}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Internal Server Error</pre>
+</body>
+</html>
+[student@workstation nodejs-app]$ oc logs dc/nodejs-dev
+Environment: 
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.4.1
+npm info using node@v8.16.1
+npm info lifecycle nodejs-app@1.0.0~prestart: nodejs-app@1.0.0
+npm info lifecycle nodejs-app@1.0.0~start: nodejs-app@1.0.0
+
+> nodejs-app@1.0.0 start /opt/app-root/src
+> node server.js
+
+Example app listening on port 8080!
+TypeError: Cannot read property 'HOSTNAME' of undefined
+    at /opt/app-root/src/server.js:7:59
+    at Layer.handle [as handle_request] (/opt/app-root/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/app-root/src/node_modules/express/lib/router/route.js:137:13)
+    at Route.dispatch (/opt/app-root/src/node_modules/express/lib/router/route.js:112:3)
+    at Layer.handle [as handle_request] (/opt/app-root/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/app-root/src/node_modules/express/lib/router/index.js:281:22
+    at Function.process_params (/opt/app-root/src/node_modules/express/lib/router/index.js:335:12)
+    at next (/opt/app-root/src/node_modules/express/lib/router/index.js:275:10)
+    at expressInit (/opt/app-root/src/node_modules/express/lib/middleware/init.js:40:5)
+    at Layer.handle [as handle_request] (/opt/app-root/src/node_modules/express/lib/router/layer.js:95:5)
+[student@workstation nodejs-app]$ sed -i s/process.environment/process.env/ server.js
+[student@workstation nodejs-app]$ git commit -am "Fixed process.env"
+[troubleshoot-review 54e6c78] Fixed process.env
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[student@workstation nodejs-app]$ git push
+Counting objects: 7, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 389 bytes | 0 bytes/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/kasovoni/DO180-apps
+   29107b3..54e6c78  troubleshoot-review -> troubleshoot-review
+[student@workstation nodejs-app]$ oc start-build bc/nodejs-dev
+build.build.openshift.io/nodejs-dev-7 started
+[student@workstation nodejs-app]$ oc logs -f dc/nodejs-dev
+Environment: 
+	DEV_MODE=false
+	NODE_ENV=production
+	DEBUG_PORT=5858
+Launching via npm...
+npm info it worked if it ends with ok
+npm info using npm@6.4.1
+npm info using node@v8.16.1
+npm info lifecycle nodejs-app@1.0.0~prestart: nodejs-app@1.0.0
+npm info lifecycle nodejs-app@1.0.0~start: nodejs-app@1.0.0
+
+> nodejs-app@1.0.0 start /opt/app-root/src
+> node server.js
+
+Example app listening on port 8080!
+TypeError: Cannot read property 'HOSTNAME' of undefined
+    at /opt/app-root/src/server.js:7:59
+    at Layer.handle [as handle_request] (/opt/app-root/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/app-root/src/node_modules/express/lib/router/route.js:137:13)
+    at Route.dispatch (/opt/app-root/src/node_modules/express/lib/router/route.js:112:3)
+    at Layer.handle [as handle_request] (/opt/app-root/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/app-root/src/node_modules/express/lib/router/index.js:281:22
+    at Function.process_params (/opt/app-root/src/node_modules/express/lib/router/index.js:335:12)
+    at next (/opt/app-root/src/node_modules/express/lib/router/index.js:275:10)
+    at expressInit (/opt/app-root/src/node_modules/express/lib/middleware/init.js:40:5)
+    at Layer.handle [as handle_request] (/opt/app-root/src/node_modules/express/lib/router/layer.js:95:5)
+^C
+[student@workstation nodejs-app]$ oc logs -f bc/nodejs-dev
+Cloning "https://github.com/kasovoni/DO180-apps" ...
+	Commit:	54e6c78cdd6cdc79c149701b211e2b6abbdb8a1d (Fixed process.env)
+	Author:	Student User <student@workstation.lab.example.com>
+	Date:	Wed Aug 5 18:33:05 2020 +0000
+Caching blobs under "/var/cache/blobs".
+Getting image source signatures
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:f31f544bb80de4b38c70506516c91d18e7de1c6988143ebe000b49159e5b1f14
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying config sha256:65d8e33f8671dc979c8a6330082a9a3f8b79bb7bda223aade2bfdbbc584ec51c
+Writing manifest to image destination
+Storing signatures
+Generating dockerfile with builder image image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9
+STEP 1: FROM image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9
+STEP 2: LABEL "io.openshift.build.commit.author"="Student User <student@workstation.lab.example.com>" "io.openshift.build.commit.date"="Wed Aug 5 18:33:05 2020 +0000" "io.openshift.build.commit.id"="54e6c78cdd6cdc79c149701b211e2b6abbdb8a1d" "io.openshift.build.commit.ref"="troubleshoot-review" "io.openshift.build.commit.message"="Fixed process.env" "io.openshift.build.source-location"="https://github.com/kasovoni/DO180-apps" "io.openshift.build.source-context-dir"="nodejs-app" "io.openshift.build.image"="image-registry.openshift-image-registry.svc:5000/openshift/nodejs@sha256:bf4030ac45b8b3ff0ea2892261f1fb5df5b077a67ef717836ac0de879cc775d9"
+STEP 3: ENV OPENSHIFT_BUILD_NAME="nodejs-dev-7" OPENSHIFT_BUILD_NAMESPACE="sila-kissuu-us-nodejs-app" OPENSHIFT_BUILD_SOURCE="https://github.com/kasovoni/DO180-apps" OPENSHIFT_BUILD_REFERENCE="troubleshoot-review" OPENSHIFT_BUILD_COMMIT="54e6c78cdd6cdc79c149701b211e2b6abbdb8a1d" npm_config_registry="http://nexus-common.apps.ocp-na2.prod.nextcle.com/repository/npm-proxy"
+STEP 4: USER root
+STEP 5: COPY upload/src /tmp/src
+STEP 6: RUN chown -R 1001:0 /tmp/src
+time="2020-08-05T18:34:32Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah328746072/mnt/rootfs\": error checking if \"/tmp/buildah328746072/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-05T18:34:32Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah328746072/mnt/rootfs\": error checking if \"/tmp/buildah328746072/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 7: USER 1001
+STEP 8: RUN /usr/libexec/s2i/assemble
+---> Installing application source ...
+---> Installing all dependencies
+npm notice created a lockfile as package-lock.json. You should commit this file.
+npm WARN nodejs-app@1.0.0 No repository field.
+npm WARN nodejs-app@1.0.0 license should be a valid SPDX license expression
+
+added 51 packages from 38 contributors in 8.394s
+---> Building in production mode
+---> Pruning the development dependencies
+npm WARN nodejs-app@1.0.0 No repository field.
+npm WARN nodejs-app@1.0.0 license should be a valid SPDX license expression
+
+up to date in 0.944s
+/opt/app-root/src/.npm is not a mountpoint
+---> Cleaning the npm cache /opt/app-root/src/.npm
+/tmp is not a mountpoint
+---> Cleaning the /tmp/npm-*
+time="2020-08-05T18:34:46Z" level=warning msg="pkg/chroot: error unmounting \"/tmp/buildah636722917/mnt/rootfs\": error checking if \"/tmp/buildah636722917/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+time="2020-08-05T18:34:46Z" level=warning msg="pkg/bind: error unmounting \"/tmp/buildah636722917/mnt/rootfs\": error checking if \"/tmp/buildah636722917/mnt/rootfs/sys/fs/cgroup/perf_event\" is mounted: no such file or directory"
+STEP 9: CMD /usr/libexec/s2i/run
+STEP 10: COMMIT temp.builder.openshift.io/sila-kissuu-us-nodejs-app/nodejs-dev-7:a7883b04
+Getting image source signatures
+Copying blob sha256:a551fb857b61df88ae64cded378611456294ee7143bc068eb3a9ee1a29934658
+Copying blob sha256:08c4aa164cbaadfb32414e39d9b252a5382b9db1dd8e028fb11805074edbe608
+Copying blob sha256:7c6c57a17fb3de2b83515a0e33782d6d769fa90725da4eb75311e5ffbf601e49
+Copying blob sha256:c3b514cae9b11a6aadc78fdbb3d7b71226759927a8149f97ea400628744ad2c9
+Copying blob sha256:cbf37c90f9eeadb5d2e74836f652c53879efffd5eb8fb1c7d2b6bb2680aa2739
+Copying blob sha256:07327dec0e2f29dd793e4aebdb1ba959d1f2a5ef1cd9ae48895d6001511f4e1d
+Copying config sha256:bb2eea11461ab65d8036fd81e9cd71517ea9c8f94f4555c3cd91eed794e79df8
+Writing manifest to image destination
+Storing signatures
+bb2eea11461ab65d8036fd81e9cd71517ea9c8f94f4555c3cd91eed794e79df8
+
+Pushing image image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-nodejs-app/nodejs-dev:latest ...
+Getting image source signatures
+Copying blob sha256:9c9d2ac50b32c2bb48d07fb4e80e81552acc76ade952777f5deb05fdac8f88c6
+Copying blob sha256:48ed3bfd822646e50676cd7606af43e984db141bb1755904362f1eb64684c68a
+Copying blob sha256:ad46648f2433aa416763060fb4baaefe64baeda603d4e572f883c21c5482fea1
+Copying blob sha256:d327c1598329494579ba3d62999df41f11bff9a2bfad57fb49b30324404ac42a
+Copying blob sha256:07327dec0e2f29dd793e4aebdb1ba959d1f2a5ef1cd9ae48895d6001511f4e1d
+Copying blob sha256:f31f544bb80de4b38c70506516c91d18e7de1c6988143ebe000b49159e5b1f14
+Copying config sha256:bb2eea11461ab65d8036fd81e9cd71517ea9c8f94f4555c3cd91eed794e79df8
+Writing manifest to image destination
+Storing signatures
+Successfully pushed image-registry.openshift-image-registry.svc:5000/sila-kissuu-us-nodejs-app/nodejs-dev@sha256:4b2f15417cd7698bc27bb9f3d3a13714c10500e495aade5fa3ac062f9610bbe9
+Push successful
+[student@workstation nodejs-app]$ curl nodejs-dev-${RHT_OCP4_DEV_USER}-nodejs-app.${RHT_OCP4_WILDCARD_DOMAIN}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Internal Server Error</pre>
+</body>
+</html>
+[student@workstation nodejs-app]$ lab troubleshoot-review grade 
+
+Grading the student's work for the Lab: Troubleshooting Containerized Applications
+
+ · The nodejs-dev application response is correct..............  PASS
+
+[student@workstation nodejs-app]$ lab troubleshoot-review finish 
+
+Completing the Lab: Troubleshooting Containerized Applications
+
+ · Log in on OpenShift.........................................  SUCCESS
+ · Deleting the 'sila-kissuu-us-nodejs-app' OpenShift project..  SUCCESS
+[student@workstation nodejs-app]$ 
+
+
+

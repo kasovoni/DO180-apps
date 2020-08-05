@@ -2860,3 +2860,172 @@ Completing the Lab: Deploying Containerized Applications on OpenShift
  · Deleting the sila-kissuu-us-ocp project.....................  SUCCESS
 [student@workstation DO180-apps]$ 
 
+
+
+
+================================
+Guided Ex: Configuring APache COntainer logs for debugging
+===========================================================
+[student@workstation ~]$ lab troubleshoot-container start 
+
+Setting up workstation for the Guided Excercise: Configuring Apache Container Logs for Debugging
+
+ · Checking podman configuration...............................  SUCCESS
+ · Downloading starter project.................................  SUCCESS
+ · Downloading solution project................................  SUCCESS
+
+Setup successful. Please proceed with the exercise.
+
+[student@workstation ~]$ less DO180/labs/troubleshoot-container/conf/httpd.conf 
+[student@workstation ~]$ cd DO180/labs/troubleshoot-container/
+[student@workstation troubleshoot-container]$ ll
+total 8
+-rwxrwxr-x. 1 student student  47 Sep 24  2019 build.sh
+drwxrwxr-x. 4 student student  84 Oct 30  2019 conf
+-rw-rw-r--. 1 student student 128 Oct 30  2019 Dockerfile
+drwxrwxr-x. 2 student student  22 Oct 21  2019 src
+[student@workstation troubleshoot-container]$ sudo podman build -t troubleshoot-container .
+STEP 1: FROM redhattraining/httpd-parent
+Getting image source signatures
+Copying blob sha256:787f47dbeaac926cc8c927a48e8a84fc97e05fbd1c08a4c9c4ddcaddfd87e2f7
+ 67.66 MB / 67.66 MB [======================================================] 2s
+Copying blob sha256:6a5240d60dc4e1ade0d103badb2a897e8103ebf0ebe08350cd582bbc9671cc7a
+ 1.45 KB / 1.45 KB [========================================================] 0s
+Copying blob sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+ 32 B / 32 B [==============================================================] 0s
+Skipping fetch of repeat blob sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+Copying blob sha256:08b8c9fdec444ba23c764be2e8c24e1526d664dc72339af2429dc66fbfefe850
+ 5.76 MB / 5.76 MB [========================================================] 0s
+Skipping fetch of repeat blob sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+Skipping fetch of repeat blob sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+Copying blob sha256:408208567b9aab11c5265eadd4cbc9c890d73d74ffcdaf3e2309aaef12cd9394
+ 148 B / 148 B [============================================================] 0s
+Skipping fetch of repeat blob sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+Skipping fetch of repeat blob sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+Writing manifest to image destination
+Storing signatures
+STEP 2: COPY src/ ${DOCROOT}/
+ERRO[0011] HOSTNAME is not supported for OCI image format, hostname 013f2af5471a will be ignored. Must use `docker` format 
+--> 058913ae568e1a5ba4181538c88158f860f6f4b62890cd322fc29fc607a25b0e
+STEP 3: FROM 058913ae568e1a5ba4181538c88158f860f6f4b62890cd322fc29fc607a25b0e
+STEP 4: MAINTAINER username <username@example.com>
+--> b7152e7d6fbda9d62c0071bee1005bc6f12bdc95d5ec1ea55570b11f3f1bcd28
+STEP 5: FROM b7152e7d6fbda9d62c0071bee1005bc6f12bdc95d5ec1ea55570b11f3f1bcd28
+STEP 6: COPY ./conf/httpd.conf /etc/httpd/conf/httpd.conf
+--> ede143fedd3de33b2d20a8f7f751be28dda491b4ee0ced09ef1dd5f70c0dd664
+STEP 7: COMMIT troubleshoot-container
+[student@workstation troubleshoot-container]$ 
+[student@workstation troubleshoot-container]$ 
+[student@workstation troubleshoot-container]$ cd ~
+[student@workstation ~]$ 
+[student@workstation ~]$ sudo podman images
+REPOSITORY                            TAG      IMAGE ID       CREATED          SIZE
+localhost/troubleshoot-container      latest   ede143fedd3d   13 seconds ago   236MB
+quay.io/redhattraining/httpd-parent   latest   4346d3cace25   14 months ago    236MB
+[student@workstation ~]$ sudo podman run --name troubleshoot-container -d -p 10080:80 troubleshoot-container
+24a679557ad31a5a36f1080001c5ee05ee7bfecdd10dd97f63b562f33e625d67
+[student@workstation ~]$ s
+bash: s: command not found...
+[student@workstation ~]$ 
+[student@workstation ~]$ sudo podman logs -f troubleshoot-container
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.88.0.18. Set the 'ServerName' directive globally to suppress this message
+[Wed Aug 05 17:45:39.580443 2020] [suexec:notice] [pid 1:tid 139894202243328] AH01232: suEXEC mechanism enabled (wrapper: /usr/sbin/suexec)
+[Wed Aug 05 17:45:39.580670 2020] [http2:debug] [pid 1:tid 139894202243328] mod_http2.c(112): AH03089: initializing post config dry run
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.88.0.18. Set the 'ServerName' directive globally to suppress this message
+[Wed Aug 05 17:45:39.593232 2020] [slotmem_shm:debug] [pid 1:tid 139894202243328] mod_slotmem_shm.c(497): AH02301: attach looking for /run/httpd/slotmem-shm-mod_heartmonitor_0.shm
+[Wed Aug 05 17:45:39.593255 2020] [lbmethod_heartbeat:notice] [pid 1:tid 139894202243328] AH02282: No slotmem from mod_heartmonitor
+[Wed Aug 05 17:45:39.594605 2020] [http2:info] [pid 1:tid 139894202243328] AH03090: mod_http2 (v1.11.3-git, feats=CHPRIO+SHA256+INVHD+DWINS, nghttp2 1.33.0), initializing...
+[Wed Aug 05 17:45:39.594644 2020] [http2:warn] [pid 1:tid 139894202243328] AH02951: mod_ssl does not seem to be enabled
+[Wed Aug 05 17:45:39.594703 2020] [proxy_http2:info] [pid 1:tid 139894202243328] AH03349: mod_proxy_http2 (v1.11.3-git, nghttp2 1.33.0), initializing...
+[Wed Aug 05 17:45:39.594722 2020] [proxy_hcheck:debug] [pid 1:tid 139894202243328] mod_proxy_hcheck.c(1050): AH03265: watchdog callback registered (_proxy_hcheck_ for 10.88.0.18)
+[Wed Aug 05 17:45:39.594739 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(454): AH010033: Watchdog: Running with WatchdogInterval 1000ms
+[Wed Aug 05 17:45:39.594743 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(462): AH02974: Watchdog: found parent providers.
+[Wed Aug 05 17:45:39.594746 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(508): AH02977: Watchdog: found child providers.
+[Wed Aug 05 17:45:39.594748 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(516): AH02978: Watchdog: Looking for child (_singleton_).
+[Wed Aug 05 17:45:39.594751 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(516): AH02978: Watchdog: Looking for child (_default_).
+[Wed Aug 05 17:45:39.594753 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(516): AH02978: Watchdog: Looking for child (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.594761 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(542): AH02979: Watchdog: Created singleton mutex (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.598376 2020] [watchdog:debug] [pid 6:tid 139893930039040] mod_watchdog.c(158): AH02972: Singleton Watchdog (_proxy_hcheck_) running
+[Wed Aug 05 17:45:39.598415 2020] [proxy_hcheck:debug] [pid 6:tid 139893930039040] mod_proxy_hcheck.c(893): AH03258: _proxy_hcheck_ watchdog started.
+[Wed Aug 05 17:45:39.598523 2020] [mpm_event:notice] [pid 1:tid 139894202243328] AH00489: Apache/2.4.37 (Red Hat Enterprise Linux) configured -- resuming normal operations
+[Wed Aug 05 17:45:39.598544 2020] [mpm_event:info] [pid 1:tid 139894202243328] AH00490: Server built: Apr  5 2019 07:31:21
+[Wed Aug 05 17:45:39.598558 2020] [core:notice] [pid 1:tid 139894202243328] AH00094: Command line: '/usr/sbin/httpd -D FOREGROUND'
+[Wed Aug 05 17:45:39.598562 2020] [core:debug] [pid 1:tid 139894202243328] log.c(1571): AH02639: Using SO_REUSEPORT: yes (1)
+[Wed Aug 05 17:45:39.599333 2020] [proxy_hcheck:debug] [pid 6:tid 139893930039040] mod_proxy_hcheck.c(907): AH03313: apr_thread_pool_create() with 16 threads succeeded
+[Wed Aug 05 17:45:39.599373 2020] [watchdog:debug] [pid 6:tid 139894202243328] mod_watchdog.c(590): AH02981: Watchdog: Created child worker thread (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.599431 2020] [proxy:debug] [pid 6:tid 139894202243328] proxy_util.c(1923): AH00925: initializing worker proxy:reverse shared
+[Wed Aug 05 17:45:39.599448 2020] [proxy:debug] [pid 6:tid 139894202243328] proxy_util.c(1980): AH00927: initializing worker proxy:reverse local
+[Wed Aug 05 17:45:39.599478 2020] [proxy:debug] [pid 6:tid 139894202243328] proxy_util.c(2015): AH00930: initialized pool in child 6 for (*) min=0 max=61 smax=61
+[Wed Aug 05 17:45:39.601309 2020] [watchdog:debug] [pid 7:tid 139894202243328] mod_watchdog.c(590): AH02981: Watchdog: Created child worker thread (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.601381 2020] [proxy:debug] [pid 7:tid 139894202243328] proxy_util.c(1923): AH00925: initializing worker proxy:reverse shared
+[Wed Aug 05 17:45:39.601401 2020] [proxy:debug] [pid 7:tid 139894202243328] proxy_util.c(1980): AH00927: initializing worker proxy:reverse local
+[Wed Aug 05 17:45:39.601427 2020] [proxy:debug] [pid 7:tid 139894202243328] proxy_util.c(2015): AH00930: initialized pool in child 7 for (*) min=0 max=61 smax=61
+[Wed Aug 05 17:45:39.601570 2020] [mpm_event:debug] [pid 6:tid 139893409650432] event.c(2313): AH02471: start_threads: Using epoll (wakeable)
+[Wed Aug 05 17:45:39.604017 2020] [watchdog:debug] [pid 9:tid 139894202243328] mod_watchdog.c(590): AH02981: Watchdog: Created child worker thread (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.604103 2020] [proxy:debug] [pid 9:tid 139894202243328] proxy_util.c(1923): AH00925: initializing worker proxy:reverse shared
+[Wed Aug 05 17:45:39.604124 2020] [proxy:debug] [pid 9:tid 139894202243328] proxy_util.c(1980): AH00927: initializing worker proxy:reverse local
+[Wed Aug 05 17:45:39.604158 2020] [proxy:debug] [pid 9:tid 139894202243328] proxy_util.c(2015): AH00930: initialized pool in child 9 for (*) min=0 max=61 smax=61
+[Wed Aug 05 17:45:39.604605 2020] [mpm_event:debug] [pid 7:tid 139893611116288] event.c(2313): AH02471: start_threads: Using epoll (wakeable)
+[Wed Aug 05 17:45:39.606753 2020] [mpm_event:debug] [pid 9:tid 139893611116288] event.c(2313): AH02471: start_threads: Using epoll (wakeable)
+^C
+[student@workstation ~]$ sudo podman logs -f troubleshoot-container
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.88.0.18. Set the 'ServerName' directive globally to suppress this message
+[Wed Aug 05 17:45:39.580443 2020] [suexec:notice] [pid 1:tid 139894202243328] AH01232: suEXEC mechanism enabled (wrapper: /usr/sbin/suexec)
+[Wed Aug 05 17:45:39.580670 2020] [http2:debug] [pid 1:tid 139894202243328] mod_http2.c(112): AH03089: initializing post config dry run
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.88.0.18. Set the 'ServerName' directive globally to suppress this message
+[Wed Aug 05 17:45:39.593232 2020] [slotmem_shm:debug] [pid 1:tid 139894202243328] mod_slotmem_shm.c(497): AH02301: attach looking for /run/httpd/slotmem-shm-mod_heartmonitor_0.shm
+[Wed Aug 05 17:45:39.593255 2020] [lbmethod_heartbeat:notice] [pid 1:tid 139894202243328] AH02282: No slotmem from mod_heartmonitor
+[Wed Aug 05 17:45:39.594605 2020] [http2:info] [pid 1:tid 139894202243328] AH03090: mod_http2 (v1.11.3-git, feats=CHPRIO+SHA256+INVHD+DWINS, nghttp2 1.33.0), initializing...
+[Wed Aug 05 17:45:39.594644 2020] [http2:warn] [pid 1:tid 139894202243328] AH02951: mod_ssl does not seem to be enabled
+[Wed Aug 05 17:45:39.594703 2020] [proxy_http2:info] [pid 1:tid 139894202243328] AH03349: mod_proxy_http2 (v1.11.3-git, nghttp2 1.33.0), initializing...
+[Wed Aug 05 17:45:39.594722 2020] [proxy_hcheck:debug] [pid 1:tid 139894202243328] mod_proxy_hcheck.c(1050): AH03265: watchdog callback registered (_proxy_hcheck_ for 10.88.0.18)
+[Wed Aug 05 17:45:39.594739 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(454): AH010033: Watchdog: Running with WatchdogInterval 1000ms
+[Wed Aug 05 17:45:39.594743 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(462): AH02974: Watchdog: found parent providers.
+[Wed Aug 05 17:45:39.594746 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(508): AH02977: Watchdog: found child providers.
+[Wed Aug 05 17:45:39.594748 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(516): AH02978: Watchdog: Looking for child (_singleton_).
+[Wed Aug 05 17:45:39.594751 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(516): AH02978: Watchdog: Looking for child (_default_).
+[Wed Aug 05 17:45:39.594753 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(516): AH02978: Watchdog: Looking for child (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.594761 2020] [watchdog:debug] [pid 1:tid 139894202243328] mod_watchdog.c(542): AH02979: Watchdog: Created singleton mutex (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.598376 2020] [watchdog:debug] [pid 6:tid 139893930039040] mod_watchdog.c(158): AH02972: Singleton Watchdog (_proxy_hcheck_) running
+[Wed Aug 05 17:45:39.598415 2020] [proxy_hcheck:debug] [pid 6:tid 139893930039040] mod_proxy_hcheck.c(893): AH03258: _proxy_hcheck_ watchdog started.
+[Wed Aug 05 17:45:39.598523 2020] [mpm_event:notice] [pid 1:tid 139894202243328] AH00489: Apache/2.4.37 (Red Hat Enterprise Linux) configured -- resuming normal operations
+[Wed Aug 05 17:45:39.598544 2020] [mpm_event:info] [pid 1:tid 139894202243328] AH00490: Server built: Apr  5 2019 07:31:21
+[Wed Aug 05 17:45:39.598558 2020] [core:notice] [pid 1:tid 139894202243328] AH00094: Command line: '/usr/sbin/httpd -D FOREGROUND'
+[Wed Aug 05 17:45:39.598562 2020] [core:debug] [pid 1:tid 139894202243328] log.c(1571): AH02639: Using SO_REUSEPORT: yes (1)
+[Wed Aug 05 17:45:39.599333 2020] [proxy_hcheck:debug] [pid 6:tid 139893930039040] mod_proxy_hcheck.c(907): AH03313: apr_thread_pool_create() with 16 threads succeeded
+[Wed Aug 05 17:45:39.599373 2020] [watchdog:debug] [pid 6:tid 139894202243328] mod_watchdog.c(590): AH02981: Watchdog: Created child worker thread (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.599431 2020] [proxy:debug] [pid 6:tid 139894202243328] proxy_util.c(1923): AH00925: initializing worker proxy:reverse shared
+[Wed Aug 05 17:45:39.599448 2020] [proxy:debug] [pid 6:tid 139894202243328] proxy_util.c(1980): AH00927: initializing worker proxy:reverse local
+[Wed Aug 05 17:45:39.599478 2020] [proxy:debug] [pid 6:tid 139894202243328] proxy_util.c(2015): AH00930: initialized pool in child 6 for (*) min=0 max=61 smax=61
+[Wed Aug 05 17:45:39.601309 2020] [watchdog:debug] [pid 7:tid 139894202243328] mod_watchdog.c(590): AH02981: Watchdog: Created child worker thread (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.601381 2020] [proxy:debug] [pid 7:tid 139894202243328] proxy_util.c(1923): AH00925: initializing worker proxy:reverse shared
+[Wed Aug 05 17:45:39.601401 2020] [proxy:debug] [pid 7:tid 139894202243328] proxy_util.c(1980): AH00927: initializing worker proxy:reverse local
+[Wed Aug 05 17:45:39.601427 2020] [proxy:debug] [pid 7:tid 139894202243328] proxy_util.c(2015): AH00930: initialized pool in child 7 for (*) min=0 max=61 smax=61
+[Wed Aug 05 17:45:39.601570 2020] [mpm_event:debug] [pid 6:tid 139893409650432] event.c(2313): AH02471: start_threads: Using epoll (wakeable)
+[Wed Aug 05 17:45:39.604017 2020] [watchdog:debug] [pid 9:tid 139894202243328] mod_watchdog.c(590): AH02981: Watchdog: Created child worker thread (_proxy_hcheck_).
+[Wed Aug 05 17:45:39.604103 2020] [proxy:debug] [pid 9:tid 139894202243328] proxy_util.c(1923): AH00925: initializing worker proxy:reverse shared
+[Wed Aug 05 17:45:39.604124 2020] [proxy:debug] [pid 9:tid 139894202243328] proxy_util.c(1980): AH00927: initializing worker proxy:reverse local
+[Wed Aug 05 17:45:39.604158 2020] [proxy:debug] [pid 9:tid 139894202243328] proxy_util.c(2015): AH00930: initialized pool in child 9 for (*) min=0 max=61 smax=61
+[Wed Aug 05 17:45:39.604605 2020] [mpm_event:debug] [pid 7:tid 139893611116288] event.c(2313): AH02471: start_threads: Using epoll (wakeable)
+[Wed Aug 05 17:45:39.606753 2020] [mpm_event:debug] [pid 9:tid 139893611116288] event.c(2313): AH02471: start_threads: Using epoll (wakeable)
+[Wed Aug 05 17:46:44.754797 2020] [authz_core:debug] [pid 6:tid 139893267203840] mod_authz_core.c(820): [client 10.88.0.1:33268] AH01626: authorization result of Require all granted: granted
+[Wed Aug 05 17:46:44.754909 2020] [authz_core:debug] [pid 6:tid 139893267203840] mod_authz_core.c(820): [client 10.88.0.1:33268] AH01626: authorization result of <RequireAny>: granted
+[Wed Aug 05 17:46:44.755459 2020] [authz_core:debug] [pid 6:tid 139893267203840] mod_authz_core.c(820): [client 10.88.0.1:33268] AH01626: authorization result of Require all granted: granted
+[Wed Aug 05 17:46:44.755465 2020] [authz_core:debug] [pid 6:tid 139893267203840] mod_authz_core.c(820): [client 10.88.0.1:33268] AH01626: authorization result of <RequireAny>: granted
+10.88.0.1 - - [05/Aug/2020:17:46:44 +0000] "GET / HTTP/1.1" 200 39
+^C
+[student@workstation ~]$ lab troubleshoot-container finish 
+
+Completing the Guided Excercise: Configuring Apache Container Logs for Debugging
+
+ · Stopping the troubleshoot-container container...............  SUCCESS
+ · Removing the troubleshoot-container container...............  SUCCESS
+ · Removing the troubleshoot-container container image.........  SUCCESS
+ · Removing redhattraining/httpd-parent container image........  SUCCESS
+[student@workstation ~]$ 
+
+
+=======================================
+Lab: Troubleshooting Containerized Apps
+=======================================
+
